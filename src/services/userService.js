@@ -1,0 +1,69 @@
+import User from '../models/user.model';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+//Register a New User
+createUser = async(userData) => {
+    const {firstName, lastName, email, password, phoneNumber} = userData;
+
+    const existingUser = await User.findOne({email}); //Check if user already exists
+
+    if(existingUser) {
+        throw new Error("User already exists");
+    }
+
+    const hashedPwd = await bcrypt.hash(password, 10); //Hashing the password
+
+    const user = await User.create({firstName,lastName,email,password: hashedPwd,phoneNumber});
+    return user;
+}
+
+
+//Find a User by email
+findUserByEmail = async(inputemail) => {
+
+    const user = User.findOne({email:inputemail});
+
+    if(user) {
+        console.log("User Found!",user);
+        return user;
+    } else {
+        console.log("User not found!");
+        throw new Error("User not Found!");
+    }
+    
+};
+
+//Check User Login
+loginUser = async(userInput) => {
+
+    const {email , password} = userInput;
+
+    const user = await User.findOne({email: email}); 
+
+    if(!user){
+        console.log("Cannot find user");
+        throw new Error(`No user with ${email} Exists`);
+    }
+
+    //Check if the passwords matches
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if(!isPasswordValid){
+        console.log("Password does not match");
+        throw new Error("Invalid email or password");
+    }
+
+    //Generate JWT Token
+    const token = jwt.sign({id: user._id}, process.env.JWT_KEY, {
+        expiresIn:"30d"
+    });
+
+    console.log("Login successful");
+    return { user, token };
+
+   
+}
+
+
+module.exports = { createUser, findUserByEmail, loginUser };
