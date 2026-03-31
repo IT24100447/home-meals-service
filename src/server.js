@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from  'dotenv';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes.js';
+import { Router } from 'express';
 
 const app = express();
 app.use(express.json());
@@ -24,11 +25,14 @@ const connectDatabase = async() => {
 
 connectDatabase();
 
-app.use('/', async(req,res) => {
+const router = Router();
+
+router.get('/', async(req,res) => {
     res.status(201).json({
         message: "Test Endpoint Works"
     });
 })
+
 app.use('/api/user', userRoutes); //User Routes
 
 
