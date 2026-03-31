@@ -1,4 +1,4 @@
-import userService from '../services/userService';
+import userService from '../services/userService.js';
 
 //Register a User
 const registerUser = async (req,res) => {
@@ -51,4 +51,4 @@ const userLogin = async(req,res) => {
     };
 }
 
-module.export = { registerUser, userLogin };
+export default { registerUser, findUserByEmail, userLogin };

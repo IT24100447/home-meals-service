@@ -1,9 +1,9 @@
-import User from '../models/user.model';
+import User from '../models/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 //Register a New User
-createUser = async(userData) => {
+const createUser = async(userData) => {
     const {firstName, lastName, email, password, phoneNumber} = userData;
 
     const existingUser = await User.findOne({email}); //Check if user already exists
@@ -20,7 +20,7 @@ createUser = async(userData) => {
 
 
 //Find a User by email
-findUserByEmail = async(inputemail) => {
+const findUserByEmail = async(inputemail) => {
 
     const user = User.findOne({email:inputemail});
 
@@ -35,7 +35,7 @@ findUserByEmail = async(inputemail) => {
 };
 
 //Check User Login
-loginUser = async(userInput) => {
+const loginUser = async(userInput) => {
 
     const {email , password} = userInput;
 
@@ -62,8 +62,6 @@ loginUser = async(userInput) => {
     console.log("Login successful");
     return { user, token };
 
-   
 }
 
-
-module.exports = { createUser, findUserByEmail, loginUser };
+export default { createUser, findUserByEmail, loginUser };
