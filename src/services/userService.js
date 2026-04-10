@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 //Register a New User
 const createUser = async(userData) => {
-    const {firstName, lastName, email, password, phoneNumber} = userData;
+    const {firstName, lastName, email, password, phoneNumber, profileImage, address, role, description} = userData;
 
     const existingUser = await User.findOne({email}); //Check if user already exists
 
@@ -14,7 +14,7 @@ const createUser = async(userData) => {
 
     const hashedPwd = await bcrypt.hash(password, 10); //Hashing the password
 
-    const user = await User.create({firstName,lastName,email,password: hashedPwd,phoneNumber});
+    const user = await User.create({firstName,lastName,email,password: hashedPwd,phoneNumber, profileImage, address, role, description});
     return user;
 }
 

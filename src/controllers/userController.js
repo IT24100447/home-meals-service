@@ -23,7 +23,6 @@ const findUserByEmail = async(req,res) => {
         const user = await userService.findUserByEmail(req.body);
         res.status(201).json({
             sucesss: true,
-            user,
             message: "Found User"
         })
     }catch(err){
@@ -40,7 +39,8 @@ const userLogin = async(req,res) => {
         const user = await userService.loginUser(req.body);
         res.status(201).json({
             sucesss: true,
-            message: "User Login Successful"
+            message: "User Login Successful",
+            token: user.token
         })
     }catch(err){
         console.log("User Login Failed");

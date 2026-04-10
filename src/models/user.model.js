@@ -33,14 +33,24 @@ const UserSchema = new mongoose.Schema({
     },
 
     address: {
+        type: String,
+        required: true
+    },
+
+    role:{
+        type: String,
+        enum: ["student", "seller"],
+        required: true
+    },
+
+    description: {
         type: String
     },
 
-    // role:{
-    //     type: String,
-    //     enum: ["user"],
-    //     default: "user"
-    // },
+    totalReviews: {
+        type: Number,
+        default: 0
+    }
 },{
     timestamps: true
 }
