@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 40,
-    color: '#CC1B1B', 
+    color: '#F79A19', 
   },
   inputCard: {
     backgroundColor: '#FFF',
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#CC1B1B',
+    backgroundColor: '#F79A19',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   },
   registerLink: {
     textAlign: 'center',
-    color:"#87CEEB",
+    color:"#000000",
     marginTop: 5, }
 });
 

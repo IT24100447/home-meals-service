@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     color: "#2F3640",
   },
   inputCard: {
-    backgroundColor: "#FFF",
+    backgroundColor: "#F79A19",
     padding: 20,
     borderRadius: 15,
     shadowColor: "#000",
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: "#7F8C8D",
+    color: "#ffffff",
     marginBottom: 6,
   },
   input: {
@@ -193,20 +193,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAFAFA",
   },
   button: {
-    backgroundColor: "#CC1B1B",
+    backgroundColor: "#F5F6FA",
     padding: 16,
     borderRadius: 10,
     alignItems: "center",
     marginTop: 10,
   },
   buttonText: {
-    color: "#FFF",
+    color: "#000000",
     fontWeight: "bold",
     fontSize: 16,
   },
   registerLink: {
     textAlign: "center",
-    color: "#87CEEB",
+    color: "#ffffff",
     marginTop: 15,
     fontSize: 14,
   },
