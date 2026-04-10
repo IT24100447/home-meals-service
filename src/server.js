@@ -3,7 +3,11 @@ import dotenv from  'dotenv';
 import mongoose from 'mongoose';
 import userRoutes from './routes/userRoutes.js';
 import { Router } from 'express';
+import CORS from 'cors';
 
+
+
+const cors = CORS;
 const app = express();
 app.use(express.json());
 const PORT = 3000;
@@ -32,6 +36,12 @@ router.get('/', async(req,res) => {
         message: "Test Endpoint Works"
     });
 })
+
+app.use(cors({
+  origin: 'http://localhost:8081',
+  credentials: true
+}));
+
 
 app.use('/api/user', userRoutes); //User Routes
 
