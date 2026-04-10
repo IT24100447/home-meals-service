@@ -61,7 +61,7 @@ function LoginScreen(){
                     <Text style={styles.buttonText}>Log in</Text>
                 </TouchableOpacity>
 
-                 <Link href="/RegisterScreen" style={styles.registerLink}> No Acoount? Register Here</Link>
+                 <Link href="/UserRegisterScreen" style={styles.registerLink}> No Acoount? Register Here</Link>
 
             </View>
         </View>
