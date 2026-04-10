@@ -135,7 +135,7 @@ return (
             <Text style={styles.buttonText}>Register</Text>
           </TouchableOpacity>
 
-          <Link href="/LoginScreen" style={styles.registerLink}>
+          <Link href="/StudentLoginScreen" style={styles.registerLink}>
             Already have an account? Log in here
           </Link>
         </View>
