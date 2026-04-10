@@ -21,12 +21,12 @@ const findUserByEmail = async(req,res) => {
 
     try{
         const user = await userService.findUserByEmail(req.body);
-        res.status(201).json({
+        res.status(200).json({
             sucesss: true,
             message: "Found User"
         })
     }catch(err){
-        res.status(500).json(
+        res.status(404).json(
             {message: err.message, sucesss: false});
     }
 }
@@ -37,7 +37,7 @@ const userLogin = async(req,res) => {
 
     try{
         const user = await userService.loginUser(req.body);
-        res.status(201).json({
+        res.status(200).json({
             sucesss: true,
             message: "User Login Successful",
             token: user.token

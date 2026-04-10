@@ -7,14 +7,9 @@ import CORS from 'cors';
 
 
 
-const cors = CORS;
 const app = express();
+app.use(CORS());
 app.use(express.json());
-const PORT = 3000;
-
-app.listen(PORT,() => {
-    console.log(`Server is Running on https//:localhost:${PORT}`)
-});
 
 dotenv.config();
 
@@ -37,12 +32,12 @@ router.get('/', async(req,res) => {
     });
 })
 
-app.use(cors({
-  origin: 'http://localhost:8081',
-  credentials: true
-}));
-
 
 app.use('/api/user', userRoutes); //User Routes
 
 
+const PORT = 3000;
+
+app.listen(PORT,() => {
+    console.log(`Server is Running on http//:localhost:${PORT}`)
+});
