@@ -1,10 +1,12 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, ScrollView, Platform, } from 'react-native';
 import { useState } from "react";
 import axios from "axios";
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 
 
 function UserRegisterScreen (){
+
+    const router = useRouter();
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -42,6 +44,7 @@ function UserRegisterScreen (){
             if(response.status === 201){
                 Alert.alert("Registration Successful! Please Log in.");
                 console.log("User Data:", response.data);
+                router.push("/StudentLoginScreen");
             }
         }catch(err){
             console.log("Error Registering Student: ", err);
