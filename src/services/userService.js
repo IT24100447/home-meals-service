@@ -54,6 +54,10 @@ const loginUser = async(userInput) => {
         throw new Error("Invalid email or password");
     }
 
+    if (user.role !== req.body.role) {  //Check the Role of the user
+    return res.status(403).json({ message: "Unauthorized: You are not registered as a " + req.body.role });
+}
+
     //Generate JWT Token
     const token = jwt.sign({id: user._id}, process.env.JWT_KEY, {
         expiresIn:"30d"

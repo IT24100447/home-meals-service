@@ -50,7 +50,11 @@ const UserSchema = new mongoose.Schema({
     totalReviews: {
         type: Number,
         default: 0
-    }
+    },
+
+    businessName: {
+        type: String
+    },
 },{
     timestamps: true
 }
