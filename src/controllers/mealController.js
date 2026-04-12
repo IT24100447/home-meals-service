@@ -53,6 +53,23 @@ const getAllMeals = async (req, res) => {
     }
 };
 
+const updateMeal = async (req, res) => {
+    try {
+        const meal = await mealService.updateMeal(req.params.id, req.body, req.file);
+        res.status(200).json({
+            success: true,
+            message: "Meal Updated Successfully",
+            meal
+        });
+    } catch (err) {
+        console.error("Error Updating Meal: ", err);
+        res.status(500).json({
+            success: false,
+            message: err.message || "Failed to update meal"
+        });
+    }
+}
+
 const removeMeal = async (req, res) => {
     try {
         const meal = await mealService.removeMeal(req.params.id);
@@ -70,4 +87,4 @@ const removeMeal = async (req, res) => {
     }
 }
 
-export default { createMeal, getAllMeals, getMyMeals, removeMeal };
+export default { createMeal, getAllMeals, getMyMeals, updateMeal, removeMeal };

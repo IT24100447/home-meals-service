@@ -53,4 +53,36 @@ const removeMeal = async (mealId) => {
     return meal;
 }
 
-export default { createMeal, removeMeal }
+const updateMeal = async (mealId, mealData, file) => {
+    try {
+        const meal = await Meal.findById(mealId);
+        if (!meal) {
+            throw new Error("Meal Not Found");
+        }
+
+        const { mealName, description, category, mealType, price, portionSize, availableQuantity, tags } = mealData;
+
+        if (mealName) meal.mealName = mealName;
+        if (description) meal.description = description;
+        if (category) meal.category = category;
+        if (mealType) meal.mealType = mealType;
+        if (price) meal.price = price;
+        if (portionSize) meal.portionSize = portionSize;
+        if (availableQuantity) meal.availableQuantity = availableQuantity;
+        if (tags) meal.tags = tags;
+
+        if (file) {
+            meal.image = file.path;
+        }
+
+        await meal.save();
+        console.log("Meal Has Been Updated Successfully");
+        return meal;
+
+    } catch (err) {
+        console.log("Error Updating Meal: ", err);
+        throw new Error(err.message || "Error Updating Meal");
+    }
+}
+
+export default { createMeal, removeMeal, updateMeal }

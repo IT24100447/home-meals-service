@@ -86,7 +86,7 @@ const SellerMenuScreen = () => {
     const renderMeal = ({ item }: { item: any }) => (
         <MealCard
             meal={item}
-            onEdit={() => Alert.alert("Edit", "Edit functionality coming soon")}
+            onEdit={() => router.push(`/EditMealScreen?id=${item._id}`)}
             onDelete={() => handleDeleteMeal(item._id)}
         />
     );

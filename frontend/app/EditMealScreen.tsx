@@ -1,24 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, SafeAreaView, Image, ActivityIndicator, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
 
-const AddMealScreen = () => {
+const EditMealScreen = () => {
     const router = useRouter();
+    const { id } = useLocalSearchParams();
     const [loading, setLoading] = useState(false);
+    const [fetching, setFetching] = useState(true);
 
     // Form states
     const [mealName, setMealName] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('Lunch'); // Default
-    const [mealType, setMealType] = useState('non-veg'); // Default
+    const [category, setCategory] = useState('Lunch');
+    const [mealType, setMealType] = useState('non-veg');
     const [price, setPrice] = useState('');
-    const [portionSize, setPortionSize] = useState('Normal'); // Default
+    const [portionSize, setPortionSize] = useState('Normal');
     const [availableQuantity, setAvailableQuantity] = useState('');
     const [image, setImage] = useState<string | null>(null);
+    const [existingImage, setExistingImage] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchMealDetails = async () => {
+            try {
+                const storedToken = Platform.OS === 'web'
+                    ? localStorage.getItem('userToken')
+                    : await SecureStore.getItemAsync('userToken');
+
+                const token = storedToken ? String(storedToken) : null;
+
+                if (!token) {
+                    Alert.alert("Error", "Session expired.");
+                    router.push('/SellerLoginScreen');
+                    return;
+                }
+
+
+                const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/mine`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (response.data.success) {
+                    const meal = response.data.meals.find((m: any) => m._id === id);
+                    if (meal) {
+                        setMealName(meal.mealName);
+                        setDescription(meal.description);
+                        setCategory(meal.category);
+                        setMealType(meal.mealType);
+                        setPrice(meal.price.toString());
+                        setPortionSize(meal.portionSize);
+                        setAvailableQuantity(meal.availableQuantity.toString());
+                        setExistingImage(meal.image);
+                    } else {
+                        Alert.alert("Error", "Meal not found.");
+                        router.back();
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching meal:", err);
+                Alert.alert("Error", "Failed to load meal details.");
+            } finally {
+                setFetching(false);
+            }
+        };
+
+        if (id) fetchMealDetails();
+    }, [id]);
 
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -39,7 +89,7 @@ const AddMealScreen = () => {
         }
     };
 
-    const handleCreateMeal = async () => {
+    const handleUpdateMeal = async () => {
         if (!mealName || !description || !price || !availableQuantity) {
             Alert.alert("Error", "Please fill in all required fields.");
             return;
@@ -55,13 +105,12 @@ const AddMealScreen = () => {
             const token = storedToken ? String(storedToken) : null;
 
             if (!token) {
-                Alert.alert("Error", "Session expired. Please login again.");
+                Alert.alert("Error", "Session expired.");
                 router.push('/SellerLoginScreen');
                 return;
             }
 
             const formData = new FormData();
-
             formData.append('mealName', mealName);
             formData.append('description', description);
             formData.append('category', category);
@@ -83,7 +132,7 @@ const AddMealScreen = () => {
                 }
             }
 
-            const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/`, formData, {
+            const response = await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/${id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`
@@ -91,17 +140,25 @@ const AddMealScreen = () => {
             });
 
             if (response.data.success) {
-                Alert.alert("Success", "Meal added to your menu!", [
+                Alert.alert("Success", "Meal updated successfully!", [
                     { text: "OK", onPress: () => router.push('/SellerMenuScreen') }
                 ]);
             }
         } catch (err: any) {
-            console.error("Error creating meal:", err);
-            Alert.alert("Error", err.response?.data?.message || "Failed to create meal.");
+            console.error("Error updating meal:", err);
+            Alert.alert("Error", err.response?.data?.message || "Failed to update meal.");
         } finally {
             setLoading(false);
         }
     };
+
+    if (fetching) {
+        return (
+            <View style={styles.center}>
+                <ActivityIndicator size="large" color="#30C65A" />
+            </View>
+        );
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -109,7 +166,7 @@ const AddMealScreen = () => {
                 <TouchableOpacity onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color="#1A1C1E" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Add New Meal</Text>
+                <Text style={styles.headerTitle}>Edit Meal</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -117,10 +174,12 @@ const AddMealScreen = () => {
                 <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
                     {image ? (
                         <Image source={{ uri: image }} style={styles.previewImage} />
+                    ) : existingImage ? (
+                        <Image source={{ uri: existingImage }} style={styles.previewImage} />
                     ) : (
                         <View style={styles.imagePlaceholder}>
                             <Ionicons name="camera-outline" size={40} color="#A0A0A0" />
-                            <Text style={styles.imageText}>Add Meal Photo</Text>
+                            <Text style={styles.imageText}>Change Meal Photo</Text>
                         </View>
                     )}
                 </TouchableOpacity>
@@ -131,7 +190,6 @@ const AddMealScreen = () => {
                         style={styles.input}
                         value={mealName}
                         onChangeText={setMealName}
-                        placeholder="e.g. Rice and Curry"
                     />
 
                     <Text style={styles.label}>Description</Text>
@@ -139,7 +197,6 @@ const AddMealScreen = () => {
                         style={[styles.input, styles.textArea]}
                         value={description}
                         onChangeText={setDescription}
-                        placeholder="Ingredients of the Meal"
                         multiline
                     />
 
@@ -151,7 +208,6 @@ const AddMealScreen = () => {
                                 value={price}
                                 onChangeText={setPrice}
                                 keyboardType="numeric"
-                                placeholder="350"
                             />
                         </View>
                         <View style={styles.flex1}>
@@ -161,7 +217,6 @@ const AddMealScreen = () => {
                                 value={availableQuantity}
                                 onChangeText={setAvailableQuantity}
                                 keyboardType="numeric"
-                                placeholder="10"
                             />
                         </View>
                     </View>
@@ -207,13 +262,13 @@ const AddMealScreen = () => {
 
                     <TouchableOpacity
                         style={styles.submitButton}
-                        onPress={handleCreateMeal}
+                        onPress={handleUpdateMeal}
                         disabled={loading}
                     >
                         {loading ? (
                             <ActivityIndicator color="#FFFFFF" />
                         ) : (
-                            <Text style={styles.submitButtonText}>Create Meal</Text>
+                            <Text style={styles.submitButtonText}>Update Meal</Text>
                         )}
                     </TouchableOpacity>
                 </View>
@@ -340,6 +395,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
 });
 
-export default AddMealScreen;
+export default EditMealScreen;
