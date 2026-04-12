@@ -4,7 +4,8 @@ import userService from '../services/userService.js';
 const registerUser = async (req,res) => {
 
     try{
-        const newUser = await userService.createUser(req.body);
+        const newUser = await userService.createUser(req.body, req.file);
+
         res.status(201).json(
             {sucesss: true, 
             newUser,
@@ -21,6 +22,7 @@ const findUserByEmail = async(req,res) => {
 
     try{
         const user = await userService.findUserByEmail(req.body);
+
         res.status(200).json({
             sucesss: true,
             message: "Found User"
@@ -37,6 +39,7 @@ const userLogin = async(req,res) => {
 
     try{
         const user = await userService.loginUser(req.body);
+        
         res.status(200).json({
             sucesss: true,
             message: "User Login Successful",

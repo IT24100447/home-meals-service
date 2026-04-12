@@ -2,8 +2,11 @@ import User from '../models/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+
 //Register a New User
-const createUser = async(userData) => {
+const createUser = async(userData, file) => {
+
+    const imageUrl = file ? file.path : 'https://res.cloudinary.com/ddo8xtk2a/image/upload/v1775966212/default-avatar-icon-of-social-media-user-vector_hrmo8x.jpg'; //Default image if no file is uploaded
     const {firstName, lastName, email, password, phoneNumber, profileImage, address, role, description} = userData;
 
     const existingUser = await User.findOne({email}); //Check if user already exists
@@ -14,7 +17,7 @@ const createUser = async(userData) => {
 
     const hashedPwd = await bcrypt.hash(password, 10); //Hashing the password
 
-    const user = await User.create({firstName,lastName,email,password: hashedPwd,phoneNumber, profileImage, address, role, description});
+    const user = await User.create({firstName,lastName,email,password: hashedPwd,phoneNumber, profileImage, address, role, description, profileImage: imageUrl});
     return user;
 }
 
