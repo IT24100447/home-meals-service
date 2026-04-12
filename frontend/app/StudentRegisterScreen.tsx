@@ -1,7 +1,8 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, ScrollView, Platform, } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, ScrollView, Platform, Image } from 'react-native';
 import { useState } from "react";
 import axios from "axios";
 import { Link, useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 
 
 function UserRegisterScreen (){
@@ -17,44 +18,91 @@ function UserRegisterScreen (){
     const [profileImage, setProfileImage] = useState('');
     const [address, setAddress] = useState('');
     const role = 'student';
+    const [image, setImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
+    //Pick the Profile Image
+    const pickImage = async () => {
+
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if(status!== 'granted'){
+        Alert.alert("Permission Denied", "Please allow access to your media library to upload a profile image.");
+        return;
+      }
+
+      const results = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1,1], //Square Crops
+        quality: 0.5, //Reduces the quality for faster uploads
+      });
+
+      if(!results.canceled){
+          setImage(results.assets[0].uri);
+      }
+    }
     const handleRegister = async () => {
+        // Validate passwords first
+        if(confirmPassword !== password){
+            Alert.alert("Password Mismatch", "Password and Confirm Password do not match");
+            return;
+        }
+
+        // Validate required fields
+        if (!firstName || !lastName || !email || !password || !phoneNumber || !address) {
+            Alert.alert("Missing Fields", "Please fill in all required fields");
+            return;
+        }
 
         setLoading(true);
 
+        const formDate = new FormData();
+        formDate.append('firstName', firstName);
+        formDate.append('lastName', lastName);
+        formDate.append('email', email);
+        formDate.append('password', password);
+        formDate.append('phoneNumber', phoneNumber);
+        formDate.append('address', address);
+        formDate.append('role', role);
+
+        if (image){
+         const fileName = image.split('/').pop() || 'profile.jpg';
+         const fileType = fileName.split('.').pop() || 'jpeg';
+
+          formDate.append('profileImage', {
+            uri: image,
+            name: fileName,
+            type: `image/${fileType}`,
+          }as any);
+          console.log("Image appended to form:", fileName);
+        }
+
         try{
-            const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/user/register`, {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password,
-                phoneNumber: phoneNumber,
-                profileImage: profileImage,
-                address: address,
-                role: role
+            console.log("Sending registration request to:", `${process.env.EXPO_PUBLIC_API_URL}/api/user/register`);
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/user/register`, formDate, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
 
-            });
-
-            if(confirmPassword !== password){
-                Alert.alert("Password and Confirm Password do not match");
-                return;
-            }
+            console.log("Response status:", response.status);
+            console.log("Response data:", response.data);
 
             if(response.status === 201){
                 Alert.alert("Registration Successful! Please Log in.");
-                console.log("User Data:", response.data);
                 router.push("/StudentLoginScreen");
             }
-        }catch(err){
+          }catch(err: any){
             console.log("Error Registering Student: ", err);
+            console.log("Error response:", err.response?.data);
+            Alert.alert("Registration Failed", err.response?.data?.message || "An error occurred during registration");
         } finally{
             setLoading(false);
         }
+    };
 
-    }
-    
-return (
+    return (
   <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F6FA" }}>
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -117,14 +165,16 @@ return (
             value={phoneNumber}
             onChangeText={setPhoneNumber}
           />
-
-          <Text style={styles.label}>Profile Image URL</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Profile Image URL"
-            value={profileImage}
-            onChangeText={setProfileImage}
-          />
+         <Text style={styles.label}>Profile Picture</Text>
+         <TouchableOpacity onPress={pickImage}>
+        {image ? (
+          <Image source={{ uri: image }} style={{ width: 100, height: 100, borderRadius: 50 }} />
+        ) : (
+          <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }}>
+            <Text>Upload</Text>
+          </View>
+        )}
+      </TouchableOpacity>
 
           <Text style={styles.label}>Address</Text>
           <TextInput
@@ -145,8 +195,7 @@ return (
       </ScrollView>
     </KeyboardAvoidingView>
   </SafeAreaView>
-);
-
+    );
 }
 
 const styles = StyleSheet.create({
