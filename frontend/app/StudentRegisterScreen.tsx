@@ -1,12 +1,11 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, ScrollView, Platform, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, KeyboardAvoidingView, ScrollView, Platform, Image, ActivityIndicator } from 'react-native';
 import { useState } from "react";
 import axios from "axios";
 import { Link, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-
+import { Ionicons } from '@expo/vector-icons';
 
 function UserRegisterScreen() {
-
   const router = useRouter();
 
   const [firstName, setFirstName] = useState('');
@@ -15,18 +14,14 @@ function UserRegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [profileImage, setProfileImage] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const role = 'student';
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  //Pick the Profile Image
   const pickImage = async () => {
-
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (status !== 'granted') {
       Alert.alert("Permission Denied", "Please allow access to your media library to upload a profile image.");
       return;
@@ -35,22 +30,21 @@ function UserRegisterScreen() {
     const results = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1], //Square Crops
-      quality: 0.5, //Reduces the quality for faster uploads
+      aspect: [1, 1],
+      quality: 0.5,
     });
 
     if (!results.canceled) {
       setImage(results.assets[0].uri);
     }
   }
+
   const handleRegister = async () => {
-    // Validate passwords first
     if (confirmPassword !== password) {
       Alert.alert("Password Mismatch", "Password and Confirm Password do not match");
       return;
     }
 
-    // Validate required fields
     if (!firstName || !lastName || !email || !password || !phoneNumber || !address || !city) {
       Alert.alert("Missing Fields", "Please fill in all required fields");
       return;
@@ -58,55 +52,49 @@ function UserRegisterScreen() {
 
     setLoading(true);
 
-    const formDate = new FormData();
-    formDate.append('firstName', firstName);
-    formDate.append('lastName', lastName);
-    formDate.append('email', email);
-    formDate.append('password', password);
-    formDate.append('phoneNumber', phoneNumber);
-    formDate.append('address', address);
-    formDate.append('city', city);
-    formDate.append('role', role);
+    const formData = new FormData();
+    formData.append('firstName', firstName);
+    formData.append('lastName', lastName);
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('phoneNumber', phoneNumber);
+    formData.append('address', address);
+    formData.append('city', city);
+    formData.append('role', role);
 
     if (image) {
       if (Platform.OS === 'web') {
         const fetchResponse = await fetch(image);
         const blob = await fetchResponse.blob();
         const fileName = `profile_${Date.now()}.jpg`;
-        formDate.append('profileImage', blob, fileName);
+        formData.append('profileImage', blob, fileName);
       } else {
         const fileName = image.split('/').pop() || 'profile.jpg';
         const fileType = fileName.split('.').pop() || 'jpeg';
-        formDate.append('profileImage', {
+        formData.append('profileImage', {
           uri: image,
           name: fileName,
           type: `image/${fileType}`,
         } as any);
-        console.log("Image appended to form:", fileName);
       }
     }
 
     try {
-      console.log("Sending registration request to:", `${process.env.EXPO_PUBLIC_API_URL}/api/v1/user/register`);
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/register`, formDate, {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/register`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
-      })
-
-      console.log("Response status:", response.status);
-      console.log("Response data:", response.data);
+      });
 
       if (response.status === 201) {
         Alert.alert(
-          "Registration Successful",
-          "Your account has been created. Please log in.",
-          [{ text: "OK", onPress: () => router.push("/StudentLoginScreen") }]
+          "Success",
+          "Your account has been created successfully!",
+          [{ text: "Login Now", onPress: () => router.push("/StudentLoginScreen") }]
         );
       }
     } catch (err: any) {
       console.log("Error Registering Student: ", err);
-      console.log("Error response:", err.response?.data);
       Alert.alert("Registration Failed", err.response?.data?.message || "An error occurred during registration");
     } finally {
       setLoading(false);
@@ -114,102 +102,142 @@ function UserRegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F6FA" }}>
+    <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#1A1C1E" />
+          </TouchableOpacity>
 
-          <View style={styles.inputCard}>
-            <Text style={styles.title}>Create Account</Text>
+          <View style={styles.header}>
+            <Text style={styles.title}>Create an Account</Text>
 
-            <Text style={styles.label}>First Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="First Name"
-              value={firstName}
-              onChangeText={setFirstName}
-            />
+          </View>
 
-            <Text style={styles.label}>Last Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Last Name"
-              value={lastName}
-              onChangeText={setLastName}
-            />
-
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-            />
-
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-
-            <Text style={styles.label}>Confirm Password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirm Password"
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-
-            <Text style={styles.label}>Phone Number</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Phone Number"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-            />
-            <Text style={styles.label}>Profile Picture</Text>
-            <TouchableOpacity onPress={pickImage}>
+          <View style={styles.imageSection}>
+            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
               {image ? (
-                <Image source={{ uri: image }} style={{ width: 100, height: 100, borderRadius: 50 }} />
+                <Image source={{ uri: image }} style={styles.profileImage} />
               ) : (
-                <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }}>
-                  <Text>Upload</Text>
+                <View style={styles.imagePlaceholder}>
+                  <Ionicons name="camera" size={30} color="#30C65A" />
                 </View>
               )}
             </TouchableOpacity>
+            <Text style={styles.imageLabel}>Upload Profile Photo</Text>
+          </View>
 
-            <Text style={styles.label}>Address</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Address"
-              value={address}
-              onChangeText={setAddress}
-            />
+          <View style={styles.form}>
+            <View style={styles.row}>
+              <View style={[styles.inputContainer, { flex: 1 }]}>
+                <Text style={styles.label}>First Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="John"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                />
+              </View>
+              <View style={[styles.inputContainer, { flex: 1 }]}>
+                <Text style={styles.label}>Last Name</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Doe"
+                  value={lastName}
+                  onChangeText={setLastName}
+                />
+              </View>
+            </View>
 
-            <Text style={styles.label}>City</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Current City"
-              value={city}
-              onChangeText={setCity}
-            />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email Address</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="john@example.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-              <Text style={styles.buttonText}>Register</Text>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Phone Number</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="+94 77 123 4567"
+                keyboardType="phone-pad"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="••••••••"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="••••••••"
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Current City</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Colombo"
+                value={city}
+                onChangeText={setCity}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Address</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Your Address"
+                multiline
+                numberOfLines={3}
+                value={address}
+                onChangeText={setAddress}
+              />
+            </View>
+
+            <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={styles.registerButtonText}>Create Account</Text>
+              )}
             </TouchableOpacity>
 
-            <Link href="/StudentLoginScreen" style={styles.registerLink}>
-              Already have an account? Log in here
-            </Link>
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <Link href="/StudentLoginScreen" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.loginLink}>Sign In</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -218,69 +246,126 @@ function UserRegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: 20,
-    paddingVertical: 40,
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
   },
-  logo: {
-    fontSize: 34,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 25,
-    color: "#CC1B1B",
+  scrollContent: {
+    padding: 30,
+    paddingTop: 60,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    padding: 10,
+    zIndex: 10,
+  },
+  header: {
+    marginBottom: 30,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-    color: "#2F3640",
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1A1C1E',
+    marginBottom: 8,
   },
-  inputCard: {
-    backgroundColor: "#F79A19",
-    padding: 20,
-    borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    elevation: 4,
-    width: "100%",
-    alignSelf: "center",
+  subtitle: {
+    fontSize: 16,
+    color: '#7F8C8D',
+  },
+  imageSection: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  imagePicker: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#F0FFF4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: '#30C65A',
+    borderStyle: 'dashed',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  imagePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageLabel: {
+    fontSize: 14,
+    color: '#30C65A',
+    fontWeight: '600',
+  },
+  form: {
+    width: '100%',
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  inputContainer: {
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    color: "#ffffff",
-    marginBottom: 6,
+    fontWeight: '600',
+    color: '#1A1C1E',
+    marginBottom: 8,
   },
   input: {
+    backgroundColor: '#F9F9F9',
     borderWidth: 1,
-    borderColor: "#DCDDE1",
-    padding: 14,
-    borderRadius: 10,
+    borderColor: '#F0F0F0',
+    borderRadius: 15,
+    padding: 15,
     fontSize: 16,
-    marginBottom: 14,
-    backgroundColor: "#FAFAFA",
+    color: '#1A1C1E',
   },
-  button: {
-    backgroundColor: "#F5F6FA",
-    padding: 16,
-    borderRadius: 10,
-    alignItems: "center",
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
+  },
+  registerButton: {
+    backgroundColor: '#30C65A',
+    padding: 18,
+    borderRadius: 15,
+    alignItems: 'center',
     marginTop: 10,
+    shadowColor: '#30C65A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  buttonText: {
-    color: "#000000",
-    fontWeight: "bold",
-    fontSize: 16,
+  registerButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
-  registerLink: {
-    textAlign: "center",
-    color: "#ffffff",
-    marginTop: 15,
-    fontSize: 14,
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 25,
+    paddingBottom: 20,
   },
+  footerText: {
+    color: '#7F8C8D',
+    fontSize: 15,
+  },
+  loginLink: {
+    color: '#30C65A',
+    fontSize: 15,
+    fontWeight: 'bold',
+  }
 });
 
 export default UserRegisterScreen;

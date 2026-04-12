@@ -1,24 +1,23 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { Ionicons } from '@expo/vector-icons';
 
 function LoginScreen() {
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!email || !password) {  //Validation
-      Alert.alert("Please Fill in all the fields");
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all the fields");
       return;
     }
 
     setLoading(true);
-
     try {
       const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/login`, {
         email: email,
@@ -27,13 +26,9 @@ function LoginScreen() {
 
       if (response.status === 200) {
         const { token, user } = response.data;
-
         console.log("LOGIN SUCCESS! Token exists:", !!token);
-        console.log("User Role:", user?.role);
 
-        if (!token) {
-          throw new Error("No token received from server");
-        }
+        if (!token) throw new Error("No token received from server");
 
         const tokenString = String(token);
         const userString = JSON.stringify(user || {});
@@ -42,7 +37,6 @@ function LoginScreen() {
           localStorage.setItem('userToken', tokenString);
           localStorage.setItem('userData', userString);
         } else {
-          // Final safety check: ensuring value is a real string and not empty
           await SecureStore.setItemAsync('userToken', tokenString);
           await SecureStore.setItemAsync('userData', userString);
         }
@@ -52,95 +46,167 @@ function LoginScreen() {
       }
     } catch (err: any) {
       console.log("Error Login: ", err);
-      Alert.alert("Error Login", "Invalid Email and Password");
+      Alert.alert("Login Failed", "Invalid email or password");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.logo}>Sign In</Text>
-
-      <View style={styles.inputCard}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          placeholder=''
-          value={email}
-          onChangeText={setEmail} />
-
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          placeholder=''
-          secureTextEntry
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword} />
-
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Log in</Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <TouchableOpacity style={styles.backButton}>
+          <Link href="/" asChild>
+            <Ionicons name="arrow-back" size={24} color="#1A1C1E" />
+          </Link>
         </TouchableOpacity>
 
-        <Link href="/SellerRegisterScreen" style={styles.registerLink}> No Acoount? Register Here</Link>
+        <View style={styles.header}>
+          <Text style={styles.title}>Seller Portal</Text>
+          <Text style={styles.subtitle}>Sign in to your account</Text>
+        </View>
 
+        <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Your Email</Text>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="mail-outline" size={20} color="#A0A0A0" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder='example@gmail.com'
+                placeholderTextColor="#A0A0A0"
+                value={email}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                onChangeText={setEmail} />
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="lock-closed-outline" size={20} color="#A0A0A0" style={styles.inputIcon} />
+              <TextInput
+                placeholder='••••••••'
+                placeholderTextColor="#A0A0A0"
+                secureTextEntry
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword} />
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.loginButtonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>New Seller? </Text>
+            <Link href="/SellerRegisterScreen" asChild>
+              <TouchableOpacity>
+                <Text style={styles.registerLink}>Register Now</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+        </View>
       </View>
-    </View>
-  )
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F6FA',
+    backgroundColor: '#FFFFFF',
+  },
+  content: {
+    flex: 1,
+    padding: 30,
     justifyContent: 'center',
-    padding: 20,
   },
-  logo: {
-    fontSize: 40,
-    fontFamily: "sans-serif",
-    fontWeight: 'bold',
-    textAlign: 'center',
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    padding: 10,
+  },
+  header: {
     marginBottom: 40,
-    color: '#F79A19',
   },
-  inputCard: {
-    backgroundColor: '#FFF',
-    padding: 20,
-    borderRadius: 15,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1A1C1E',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#7F8C8D',
+  },
+  form: {
+    width: '100%',
+  },
+  inputContainer: {
+    marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    color: '#7F8C8D',
+    fontWeight: '600',
+    color: '#1A1C1E',
     marginBottom: 8,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#DCDDE1',
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: '#F79A19',
-    padding: 15,
-    borderRadius: 8,
+  inputWrapper: {
+    flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    borderRadius: 15,
+    backgroundColor: '#F9F9F9',
+    paddingHorizontal: 15,
   },
-  buttonText: {
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 15,
+    fontSize: 16,
+    color: '#1A1C1E',
+  },
+  loginButton: {
+    backgroundColor: '#30C65A',
+    padding: 18,
+    borderRadius: 15,
+    alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#30C65A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  loginButtonText: {
     color: '#FFF',
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 25,
+  },
+  footerText: {
+    color: '#7F8C8D',
+    fontSize: 15,
   },
   registerLink: {
-    textAlign: 'center',
-    color: "#000000",
-    marginTop: 5,
+    color: '#30C65A',
+    fontSize: 15,
+    fontWeight: 'bold',
   }
 });
 
