@@ -17,6 +17,7 @@ function UserRegisterScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [profileImage, setProfileImage] = useState('');
   const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
   const role = 'student';
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ function UserRegisterScreen() {
     }
 
     // Validate required fields
-    if (!firstName || !lastName || !email || !password || !phoneNumber || !address) {
+    if (!firstName || !lastName || !email || !password || !phoneNumber || !address || !city) {
       Alert.alert("Missing Fields", "Please fill in all required fields");
       return;
     }
@@ -64,6 +65,7 @@ function UserRegisterScreen() {
     formDate.append('password', password);
     formDate.append('phoneNumber', phoneNumber);
     formDate.append('address', address);
+    formDate.append('city', city);
     formDate.append('role', role);
 
     if (image) {
@@ -191,6 +193,14 @@ function UserRegisterScreen() {
               placeholder="Address"
               value={address}
               onChangeText={setAddress}
+            />
+
+            <Text style={styles.label}>City</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Current City"
+              value={city}
+              onChangeText={setCity}
             />
 
             <TouchableOpacity style={styles.button} onPress={handleRegister}>

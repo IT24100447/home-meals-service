@@ -31,10 +31,6 @@ const createUser = async (userData, file) => {
     });
 
     console.log("User successfully saved to database:", user._id);
-    const count = await User.countDocuments();
-    const allUsers = await User.find({}, "email");
-    console.log(`Total users in database now: ${count}`);
-    console.log("Registered Emails in this DB:", allUsers.map(u => u.email));
     return user;
 }
 

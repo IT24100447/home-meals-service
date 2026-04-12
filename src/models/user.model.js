@@ -7,27 +7,27 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
     lastName: {
-        type:String,
+        type: String,
         required: true
     },
 
-    email:{
+    email: {
         type: String,
         required: true,
         unique: true
     },
-    
-    password:{
+
+    password: {
         type: String,
         required: true
     },
 
-    phoneNumber:{
-        type: String,
+    phoneNumber: {
+        type: Number,
         required: true
     },
 
-    profileImage:{
+    profileImage: {
         type: String,
 
     },
@@ -37,7 +37,12 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
 
-    role:{
+    city: {
+        type: String,
+        required: true
+    },
+
+    role: {
         type: String,
         enum: ["student", "seller"],
         required: true
@@ -55,7 +60,7 @@ const UserSchema = new mongoose.Schema({
     businessName: {
         type: String
     },
-},{
+}, {
     timestamps: true
 }
 );

@@ -19,6 +19,7 @@ function UserRegisterScreen() {
   const [description, setDescription] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [image, setImage] = useState<string | null>(null);
+  const [city, setCity] = useState('');
 
   const router = useRouter();
 
@@ -53,7 +54,7 @@ function UserRegisterScreen() {
     }
 
     // Validate required fields
-    if (!firstName || !lastName || !email || !password || !phoneNumber || !address) {
+    if (!firstName || !lastName || !email || !password || !phoneNumber || !address || !city) {
       Alert.alert("Missing Fields", "Please fill in all required fields.");
       return;
     }
@@ -67,6 +68,7 @@ function UserRegisterScreen() {
     formData.append('password', password);
     formData.append('phoneNumber', phoneNumber);
     formData.append('address', address);
+    formData.append('city', city);
     formData.append('role', role);
     formData.append('description', description);
     formData.append('businessName', businessName);
@@ -212,6 +214,14 @@ function UserRegisterScreen() {
               placeholder="Address"
               value={address}
               onChangeText={setAddress}
+            />
+
+            <Text style={styles.label}>City</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Current City"
+              value={city}
+              onChangeText={setCity}
             />
 
             <TouchableOpacity style={styles.button} onPress={handleRegister}>

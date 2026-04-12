@@ -1,4 +1,4 @@
-import 'dotenv/config';//hha
+import 'dotenv/config';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import User from './models/user.model.js';
