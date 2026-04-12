@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import User from './models/user.model.js';
 import userRoutes from './routes/userRoutes.js';
+import mealRoutes from './routes/mealRoutes.js';
 import { Router } from 'express';
 import CORS from 'cors';
 import express from 'express';
@@ -47,6 +48,7 @@ router.get('/', async (req, res) => {
 
 
 app.use('/api/user', userRoutes); //User Routes
+app.use('/api/meal', mealRoutes); //Meal Routes
 
 
 const PORT = 3000;

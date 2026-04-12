@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const MealSchema = new mongoose.Schema({
 
-    sellerId:{
+    sellerId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Seller",
+        ref: "User",
         required: true
     },
 
@@ -20,6 +20,7 @@ const MealSchema = new mongoose.Schema({
     category: {
         type: String,
         enum: ["Breakfast", "Lunch", "Dinner"],
+        required: true
     },
 
     mealType: {
@@ -34,32 +35,33 @@ const MealSchema = new mongoose.Schema({
 
     portionSize: {
         type: String,
-        enum: ["Normal","Large"]
+        enum: ["Normal", "Large"],
+        required: true
     },
 
-    image: { 
-        type: String 
+    image: {
+        type: String
     },
 
-    availableQuantity: { 
+    availableQuantity: {
         type: Number,
-        default: 0 
+        default: 0
     },
 
-    averageRating: { 
-        type: Number, 
-        default: 0 
+    averageRating: {
+        type: Number,
+        default: 0
     },
 
-    totalOrders: { 
-        type: Number, 
-        default: 0 
+    totalOrders: {
+        type: Number,
+        default: 0
     },
 
     tags: [{ type: String }]
-},{
+}, {
     timestamps: true
 }
 );
 
-module.exports = mongoose.model("Meal",MealSchema);
+export default mongoose.model("Meal", MealSchema);
