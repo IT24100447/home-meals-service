@@ -19,6 +19,7 @@ const SellerMenuScreen = () => {
                 : await SecureStore.getItemAsync('userToken');
             
             const token = storedToken ? String(storedToken) : null;
+            console.log("Fetching meals with token exists:", !!token);
 
             if (!token) {
                 Alert.alert("Error", "Session expired. Please login again.");
@@ -33,8 +34,8 @@ const SellerMenuScreen = () => {
             if (response.data.success) {
                 setMeals(response.data.meals);
             }
-        } catch (err) {
-            console.error("Error fetching meals:", err);
+        } catch (err: any) {
+            console.error("Error fetching meals:", err.response?.data || err.message);
             Alert.alert("Error", "Could not fetch your menu.");
         } finally {
             setLoading(false);

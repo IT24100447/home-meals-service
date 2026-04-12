@@ -1,4 +1,5 @@
 import mealService from "../services/mealService.js";
+import Meal from "../models/meal.model.js";
 
 const createMeal = async (req, res) => {
     try {
