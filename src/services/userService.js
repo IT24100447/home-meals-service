@@ -17,7 +17,17 @@ const createUser = async(userData, file) => {
 
     const hashedPwd = await bcrypt.hash(password, 10); //Hashing the password
 
-    const user = await User.create({firstName,lastName,email,password: hashedPwd,phoneNumber, profileImage, address, role, description, profileImage: imageUrl});
+    const user = await User.create({
+        firstName,
+        lastName,
+        email,
+        password: hashedPwd,
+        phoneNumber,
+        address,
+        role,
+        description,
+        profileImage: imageUrl
+    });
     return user;
 }
 

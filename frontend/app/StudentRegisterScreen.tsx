@@ -5,197 +5,206 @@ import { Link, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 
 
-function UserRegisterScreen (){
+function UserRegisterScreen() {
 
-    const router = useRouter();
+  const router = useRouter();
 
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [profileImage, setProfileImage] = useState('');
-    const [address, setAddress] = useState('');
-    const role = 'student';
-    const [image, setImage] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [profileImage, setProfileImage] = useState('');
+  const [address, setAddress] = useState('');
+  const role = 'student';
+  const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-    //Pick the Profile Image
-    const pickImage = async () => {
+  //Pick the Profile Image
+  const pickImage = async () => {
 
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-      if(status!== 'granted'){
-        Alert.alert("Permission Denied", "Please allow access to your media library to upload a profile image.");
-        return;
-      }
+    if (status !== 'granted') {
+      Alert.alert("Permission Denied", "Please allow access to your media library to upload a profile image.");
+      return;
+    }
 
-      const results = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1,1], //Square Crops
-        quality: 0.5, //Reduces the quality for faster uploads
-      });
+    const results = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], //Square Crops
+      quality: 0.5, //Reduces the quality for faster uploads
+    });
 
-      if(!results.canceled){
-          setImage(results.assets[0].uri);
+    if (!results.canceled) {
+      setImage(results.assets[0].uri);
+    }
+  }
+  const handleRegister = async () => {
+    // Validate passwords first
+    if (confirmPassword !== password) {
+      Alert.alert("Password Mismatch", "Password and Confirm Password do not match");
+      return;
+    }
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password || !phoneNumber || !address) {
+      Alert.alert("Missing Fields", "Please fill in all required fields");
+      return;
+    }
+
+    setLoading(true);
+
+    const formDate = new FormData();
+    formDate.append('firstName', firstName);
+    formDate.append('lastName', lastName);
+    formDate.append('email', email);
+    formDate.append('password', password);
+    formDate.append('phoneNumber', phoneNumber);
+    formDate.append('address', address);
+    formDate.append('role', role);
+
+    if (image) {
+      if (Platform.OS === 'web') {
+        const fetchResponse = await fetch(image);
+        const blob = await fetchResponse.blob();
+        const fileName = `profile_${Date.now()}.jpg`;
+        formDate.append('profileImage', blob, fileName);
+      } else {
+        const fileName = image.split('/').pop() || 'profile.jpg';
+        const fileType = fileName.split('.').pop() || 'jpeg';
+        formDate.append('profileImage', {
+          uri: image,
+          name: fileName,
+          type: `image/${fileType}`,
+        } as any);
+        console.log("Image appended to form:", fileName);
       }
     }
-    const handleRegister = async () => {
-        // Validate passwords first
-        if(confirmPassword !== password){
-            Alert.alert("Password Mismatch", "Password and Confirm Password do not match");
-            return;
+
+    try {
+      console.log("Sending registration request to:", `${process.env.EXPO_PUBLIC_API_URL}/api/user/register`);
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/user/register`, formDate, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
         }
+      })
 
-        // Validate required fields
-        if (!firstName || !lastName || !email || !password || !phoneNumber || !address) {
-            Alert.alert("Missing Fields", "Please fill in all required fields");
-            return;
-        }
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data);
 
-        setLoading(true);
+      if (response.status === 201) {
+        Alert.alert(
+          "Registration Successful",
+          "Your account has been created. Please log in.",
+          [{ text: "OK", onPress: () => router.push("/StudentLoginScreen") }]
+        );
+      }
+    } catch (err: any) {
+      console.log("Error Registering Student: ", err);
+      console.log("Error response:", err.response?.data);
+      Alert.alert("Registration Failed", err.response?.data?.message || "An error occurred during registration");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const formDate = new FormData();
-        formDate.append('firstName', firstName);
-        formDate.append('lastName', lastName);
-        formDate.append('email', email);
-        formDate.append('password', password);
-        formDate.append('phoneNumber', phoneNumber);
-        formDate.append('address', address);
-        formDate.append('role', role);
-
-        if (image){
-         const fileName = image.split('/').pop() || 'profile.jpg';
-         const fileType = fileName.split('.').pop() || 'jpeg';
-
-          formDate.append('profileImage', {
-            uri: image,
-            name: fileName,
-            type: `image/${fileType}`,
-          }as any);
-          console.log("Image appended to form:", fileName);
-        }
-
-        try{
-            console.log("Sending registration request to:", `${process.env.EXPO_PUBLIC_API_URL}/api/user/register`);
-            const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/user/register`, formDate, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
-
-            console.log("Response status:", response.status);
-            console.log("Response data:", response.data);
-
-            if(response.status === 201){
-                Alert.alert("Registration Successful", "Your account has been created. Please log in.");
-                router.push("/StudentLoginScreen");
-            }
-          }catch(err: any){
-            console.log("Error Registering Student: ", err);
-            console.log("Error response:", err.response?.data);
-            Alert.alert("Registration Failed", err.response?.data?.message || "An error occurred during registration");
-        } finally{
-            setLoading(false);
-        }
-    };
-
-    return (
-  <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F6FA" }}>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#F5F6FA" }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
 
-        <View style={styles.inputCard}>
-          <Text style={styles.title}>Create Account</Text>
+          <View style={styles.inputCard}>
+            <Text style={styles.title}>Create Account</Text>
 
-          <Text style={styles.label}>First Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="First Name"
-            value={firstName}
-            onChangeText={setFirstName}
-          />
+            <Text style={styles.label}>First Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="First Name"
+              value={firstName}
+              onChangeText={setFirstName}
+            />
 
-          <Text style={styles.label}>Last Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Last Name"
-            value={lastName}
-            onChangeText={setLastName}
-          />
+            <Text style={styles.label}>Last Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Last Name"
+              value={lastName}
+              onChangeText={setLastName}
+            />
 
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-          />
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+            />
 
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
 
-          <Text style={styles.label}>Confirm Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-          />
+            <Text style={styles.label}>Confirm Password</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Confirm Password"
+              secureTextEntry
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
 
-          <Text style={styles.label}>Phone Number</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Phone Number"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-          />
-         <Text style={styles.label}>Profile Picture</Text>
-         <TouchableOpacity onPress={pickImage}>
-        {image ? (
-          <Image source={{ uri: image }} style={{ width: 100, height: 100, borderRadius: 50 }} />
-        ) : (
-          <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }}>
-            <Text>Upload</Text>
+            <Text style={styles.label}>Phone Number</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Phone Number"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+            />
+            <Text style={styles.label}>Profile Picture</Text>
+            <TouchableOpacity onPress={pickImage}>
+              {image ? (
+                <Image source={{ uri: image }} style={{ width: 100, height: 100, borderRadius: 50 }} />
+              ) : (
+                <View style={{ width: 100, height: 100, borderRadius: 50, backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }}>
+                  <Text>Upload</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <Text style={styles.label}>Address</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Address"
+              value={address}
+              onChangeText={setAddress}
+            />
+
+            <TouchableOpacity style={styles.button} onPress={handleRegister}>
+              <Text style={styles.buttonText}>Register</Text>
+            </TouchableOpacity>
+
+            <Link href="/StudentLoginScreen" style={styles.registerLink}>
+              Already have an account? Log in here
+            </Link>
           </View>
-        )}
-      </TouchableOpacity>
-
-          <Text style={styles.label}>Address</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Address"
-            value={address}
-            onChangeText={setAddress}
-          />
-
-          <TouchableOpacity style={styles.button} onPress={handleRegister}>
-            <Text style={styles.buttonText}>Register</Text>
-          </TouchableOpacity>
-
-          <Link href="/StudentLoginScreen" style={styles.registerLink}>
-            Already have an account? Log in here
-          </Link>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-  </SafeAreaView>
-    );
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
