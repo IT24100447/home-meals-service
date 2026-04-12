@@ -46,11 +46,48 @@ const SellerMenuScreen = () => {
         fetchMeals();
     }, []);
 
+    const handleDeleteMeal = (mealId: string) => {
+        Alert.alert(
+            "Delete Meal",
+            "Are you sure to delete it?",
+            [
+                { text: "No", style: "cancel" },
+                {
+                    text: "Yes",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            const storedToken = Platform.OS === 'web'
+                                ? localStorage.getItem('userToken')
+                                : await SecureStore.getItemAsync('userToken');
+
+                            const token = storedToken ? String(storedToken) : null;
+                            if (!token) return;
+
+                            const response = await axios.delete(
+                                `${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/${mealId}`,
+                                { headers: { Authorization: `Bearer ${token}` } }
+                            );
+
+                            if (response.data.success) {
+                                setMeals((prevMeals) => prevMeals.filter((m: any) => m._id !== mealId));
+                                Alert.alert("Success", "Meal deleted successfully");
+                            }
+                        } catch (err: any) {
+                            console.error("Error deleting meal:", err.response?.data || err.message);
+                            Alert.alert("Error", "Could not delete the meal. Please try again.");
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     const renderMeal = ({ item }: { item: any }) => (
         <MealCard
             meal={item}
             onEdit={() => Alert.alert("Edit", "Edit functionality coming soon")}
-            onDelete={() => Alert.alert("Delete", "Delete functionality coming soon")}
+            onDelete={() => handleDeleteMeal(item._id)}
         />
     );
 
