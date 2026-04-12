@@ -27,6 +27,19 @@ const createMeal = async (req, res) => {
     }
 };
 
+const getMyMeals = async (req, res) => {
+    try {
+        const sellerId = req.user.id;
+        const meals = await Meal.find({ sellerId });
+        res.status(200).json({
+            success: true,
+            meals
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
 const getAllMeals = async (req, res) => {
     try {
         const meals = await Meal.find().populate('sellerId', 'firstName lastName businessName city');
@@ -37,6 +50,6 @@ const getAllMeals = async (req, res) => {
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
     }
-}
+};
 
-export default { createMeal, getAllMeals };
+export default { createMeal, getAllMeals, getMyMeals };

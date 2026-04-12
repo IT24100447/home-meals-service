@@ -11,8 +11,11 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
+        // Determine folder based on request URL
+        const folderName = req.baseUrl.includes('meal') ? "meals" : "profile_pics";
+        
         return {
-            folder: "profile_pics",
+            folder: folderName,
             allowed_formats: ["jpg", "jpeg", "png"],
             resource_type: "image",
         };

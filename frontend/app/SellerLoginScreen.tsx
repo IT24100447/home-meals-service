@@ -1,40 +1,61 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform } from 'react-native';
 import { useState } from 'react';
-import { Link } from 'expo-router';
-import  axios  from 'axios'
+import { Link, useRouter } from 'expo-router';
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
 
+function LoginScreen() {
 
-function LoginScreen(){
-
-    const[email, setEmail] = useState('');
-    const[password, setPassword] = useState('');
-    const[loading, setLoading] = useState(false)
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const handleLogin = async () => {
-        if(!email || !password){  //Validation
-          Alert.alert("Please Fill in all the fields");
-          return;
+        if (!email || !password) {  //Validation
+            Alert.alert("Please Fill in all the fields");
+            return;
         }
-    
 
-    setLoading(true);
+        setLoading(true);
 
-    try{
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/user/login`, {
-        email: email,
-        password: password
-      });
+        try {
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/user/login`, {
+                email: email,
+                password: password
+            });
 
-      if(response.status === 200){
-        Alert.alert("Welcome!")
-        console.log("User Data:",response.data);
-      }
-    }catch(err){
-      console.log("Error Login: ",err);
-      Alert.alert("Error Login","Invalid Email and Password");
-    }finally{
-      setLoading(false);
-    }
+            if (response.status === 200) {
+                const { token, user } = response.data;
+                
+                console.log("LOGIN SUCCESS! Token exists:", !!token);
+                console.log("User Role:", user?.role);
+
+                if (!token) {
+                    throw new Error("No token received from server");
+                }
+
+                const tokenString = String(token);
+                const userString = JSON.stringify(user || {});
+
+                if (Platform.OS === 'web') {
+                    localStorage.setItem('userToken', tokenString);
+                    localStorage.setItem('userData', userString);
+                } else {
+                    // Final safety check: ensuring value is a real string and not empty
+                    await SecureStore.setItemAsync('userToken', tokenString);
+                    await SecureStore.setItemAsync('userData', userString);
+                }
+
+                Alert.alert("Welcome!", "You have successfully logged in.");
+                router.push("/SellerDashboard");
+            }
+        } catch (err: any) {
+            console.log("Error Login: ", err);
+            Alert.alert("Error Login", "Invalid Email and Password");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return(

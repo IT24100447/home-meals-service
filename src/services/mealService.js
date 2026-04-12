@@ -6,15 +6,15 @@ const createMeal = async (mealData, file, sellerId) => {
         const imageUrl = file ? file.path : "https://res.cloudinary.com/ddo8xtk2a/image/upload/v1775966212/default-avatar-icon-of-social-media-user-vector_hrmo8x.jpg";
         const { mealName, description, category, mealType, price, portionSize, availableQuantity, tags } = mealData;
 
-        if (mealType !== "veg" || "non-veg") {
+        if (!["veg", "non-veg"].includes(mealType)) {
             throw new Error("Invalid Meal Type");
         }
 
-        if (category !== "Breakfast" || "Lunch" || "Dinner") {
+        if (!["Breakfast", "Lunch", "Dinner"].includes(category)) {
             throw new Error("Invalid Category");
         }
 
-        if (portionSize !== "Normal" || "Large") {
+        if (!["Normal", "Large"].includes(portionSize)) {
             throw new Error("Invalid Portion Size");
         }
 
