@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 const createUser = async (userData, file) => {
 
     const imageUrl = file ? file.path : 'https://res.cloudinary.com/ddo8xtk2a/image/upload/v1775966212/default-avatar-icon-of-social-media-user-vector_hrmo8x.jpg'; //Default image if no file is uploaded
-    const { firstName, lastName, email, password, phoneNumber, address, role, description, businessName } = userData;
+    const { firstName, lastName, email, password, phoneNumber, address, city, role, description, businessName } = userData;
 
     const existingUser = await User.findOne({ email }); //Check if user already exists
 
@@ -24,6 +24,7 @@ const createUser = async (userData, file) => {
         password: hashedPwd,
         phoneNumber,
         address,
+        city,
         role,
         description,
         businessName,
