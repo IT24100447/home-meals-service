@@ -53,4 +53,21 @@ const getAllMeals = async (req, res) => {
     }
 };
 
-export default { createMeal, getAllMeals, getMyMeals };
+const removeMeal = async (req, res) => {
+    try {
+        const meal = await mealService.removeMeal(req.params.id);
+        res.status(200).json({
+            success: true,
+            message: "Meal Deleted",
+            meal
+        })
+    } catch (err) {
+        console.log("Error Deleting Meal: ", err);
+        res.status(500).json({
+            success: false,
+            message: err.message || "Failed to delete meal"
+        })
+    }
+}
+
+export default { createMeal, getAllMeals, getMyMeals, removeMeal };

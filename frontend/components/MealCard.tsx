@@ -17,19 +17,19 @@ const MealCard = ({ meal, onDelete, onEdit }: MealCardProps) => {
     return (
         <View style={styles.card}>
             <Image source={{ uri: meal.image }} style={styles.image} />
-            
+
             <View style={styles.content}>
                 <Text style={styles.title} numberOfLines={1}>{meal.mealName}</Text>
                 <Text style={styles.description} numberOfLines={2}>{meal.description}</Text>
-                
+
                 <View style={styles.footer}>
-                    <Text style={styles.price}>${meal.price.toFixed(2)}</Text>
-                    
+                    <Text style={styles.price}>Rs.{meal.price.toFixed(2)}</Text>
+
                     <View style={styles.actions}>
                         <TouchableOpacity style={styles.actionBtn} onPress={onEdit}>
                             <Ionicons name="pencil-outline" size={18} color="#A0A0A0" />
                         </TouchableOpacity>
-                        
+
                         <TouchableOpacity style={[styles.actionBtn, styles.deleteBtn]} onPress={onDelete}>
                             <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
                         </TouchableOpacity>

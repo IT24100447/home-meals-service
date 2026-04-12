@@ -14,10 +14,10 @@ const SellerMenuScreen = () => {
 
     const fetchMeals = async () => {
         try {
-            const storedToken = Platform.OS === 'web' 
-                ? localStorage.getItem('userToken') 
+            const storedToken = Platform.OS === 'web'
+                ? localStorage.getItem('userToken')
                 : await SecureStore.getItemAsync('userToken');
-            
+
             const token = storedToken ? String(storedToken) : null;
             console.log("Fetching meals with token exists:", !!token);
 
@@ -27,7 +27,7 @@ const SellerMenuScreen = () => {
                 return;
             }
 
-            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/meal/my-meals`, {
+            const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/mine`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -47,8 +47,8 @@ const SellerMenuScreen = () => {
     }, []);
 
     const renderMeal = ({ item }: { item: any }) => (
-        <MealCard 
-            meal={item} 
+        <MealCard
+            meal={item}
             onEdit={() => Alert.alert("Edit", "Edit functionality coming soon")}
             onDelete={() => Alert.alert("Delete", "Delete functionality coming soon")}
         />
@@ -58,8 +58,8 @@ const SellerMenuScreen = () => {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Your Menu</Text>
-                <TouchableOpacity 
-                    style={styles.addButton} 
+                <TouchableOpacity
+                    style={styles.addButton}
                     onPress={() => router.push('/AddMealScreen')}
                 >
                     <Ionicons name="add" size={30} color="#FFFFFF" />

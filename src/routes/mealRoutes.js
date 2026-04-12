@@ -5,8 +5,8 @@ import { upload } from "../services/cloudinaryConfig.js";
 
 const router = Router();
 
-router.post("/create", authMiddleware, upload.single('image'), mealController.createMeal);
-router.get("/my-meals", authMiddleware, mealController.getMyMeals);
-router.get("/all", mealController.getAllMeals);
+router.post("/", authMiddleware, upload.single('image'), mealController.createMeal);
+router.get("/mine", authMiddleware, mealController.getMyMeals);
+router.get("/", mealController.getAllMeals);
 
 export default router;

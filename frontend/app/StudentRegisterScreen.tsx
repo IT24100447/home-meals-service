@@ -87,8 +87,8 @@ function UserRegisterScreen() {
     }
 
     try {
-      console.log("Sending registration request to:", `${process.env.EXPO_PUBLIC_API_URL}/api/user/register`);
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/user/register`, formDate, {
+      console.log("Sending registration request to:", `${process.env.EXPO_PUBLIC_API_URL}/api/v1/user/register`);
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/register`, formDate, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

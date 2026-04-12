@@ -48,10 +48,10 @@ const AddMealScreen = () => {
         setLoading(true);
 
         try {
-            const storedToken = Platform.OS === 'web' 
-                ? localStorage.getItem('userToken') 
+            const storedToken = Platform.OS === 'web'
+                ? localStorage.getItem('userToken')
                 : await SecureStore.getItemAsync('userToken');
-            
+
             const token = storedToken ? String(storedToken) : null;
 
             if (!token) {
@@ -61,7 +61,7 @@ const AddMealScreen = () => {
             }
 
             const formData = new FormData();
-            
+
             formData.append('mealName', mealName);
             formData.append('description', description);
             formData.append('category', category);
@@ -83,7 +83,7 @@ const AddMealScreen = () => {
                 }
             }
 
-            const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/meal/create`, formData, {
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`
@@ -127,39 +127,39 @@ const AddMealScreen = () => {
 
                 <View style={styles.form}>
                     <Text style={styles.label}>Meal Name</Text>
-                    <TextInput 
-                        style={styles.input} 
-                        value={mealName} 
-                        onChangeText={setMealName} 
-                        placeholder="e.g. Spicy Chicken Enchiladas" 
+                    <TextInput
+                        style={styles.input}
+                        value={mealName}
+                        onChangeText={setMealName}
+                        placeholder="e.g. Rice and Curry"
                     />
 
                     <Text style={styles.label}>Description</Text>
-                    <TextInput 
-                        style={[styles.input, styles.textArea]} 
-                        value={description} 
-                        onChangeText={setDescription} 
-                        placeholder="Tell students what's in the meal..." 
+                    <TextInput
+                        style={[styles.input, styles.textArea]}
+                        value={description}
+                        onChangeText={setDescription}
+                        placeholder="Ingredients of the Meal"
                         multiline
                     />
 
                     <View style={styles.row}>
                         <View style={styles.flex1}>
-                            <Text style={styles.label}>Price ($)</Text>
-                            <TextInput 
-                                style={styles.input} 
-                                value={price} 
-                                onChangeText={setPrice} 
-                                keyboardType="numeric" 
-                                placeholder="8.50"
+                            <Text style={styles.label}>Price (LKR)</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={price}
+                                onChangeText={setPrice}
+                                keyboardType="numeric"
+                                placeholder="350"
                             />
                         </View>
                         <View style={styles.flex1}>
                             <Text style={styles.label}>Quantity</Text>
-                            <TextInput 
-                                style={styles.input} 
-                                value={availableQuantity} 
-                                onChangeText={setAvailableQuantity} 
+                            <TextInput
+                                style={styles.input}
+                                value={availableQuantity}
+                                onChangeText={setAvailableQuantity}
                                 keyboardType="numeric"
                                 placeholder="10"
                             />
@@ -169,8 +169,8 @@ const AddMealScreen = () => {
                     <Text style={styles.label}>Category</Text>
                     <View style={styles.chipRow}>
                         {['Breakfast', 'Lunch', 'Dinner'].map(item => (
-                            <TouchableOpacity 
-                                key={item} 
+                            <TouchableOpacity
+                                key={item}
                                 style={[styles.chip, category === item && styles.activeChip]}
                                 onPress={() => setCategory(item)}
                             >
@@ -182,8 +182,8 @@ const AddMealScreen = () => {
                     <Text style={styles.label}>Meal Type</Text>
                     <View style={styles.chipRow}>
                         {['veg', 'non-veg'].map(item => (
-                            <TouchableOpacity 
-                                key={item} 
+                            <TouchableOpacity
+                                key={item}
                                 style={[styles.chip, mealType === item && styles.activeChip]}
                                 onPress={() => setMealType(item)}
                             >
@@ -192,8 +192,8 @@ const AddMealScreen = () => {
                         ))}
                     </View>
 
-                    <TouchableOpacity 
-                        style={styles.submitButton} 
+                    <TouchableOpacity
+                        style={styles.submitButton}
                         onPress={handleCreateMeal}
                         disabled={loading}
                     >

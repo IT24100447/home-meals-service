@@ -92,7 +92,7 @@ function UserRegisterScreen() {
     }
 
     try {
-      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/user/register`, formData, {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/register`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

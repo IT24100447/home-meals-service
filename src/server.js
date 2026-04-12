@@ -47,8 +47,8 @@ router.get('/', async (req, res) => {
 })
 
 
-app.use('/api/user', userRoutes); //User Routes
-app.use('/api/meal', mealRoutes); //Meal Routes
+app.use('/api/v1/users', userRoutes); //User Routes
+app.use('/api/v1/meals', mealRoutes); //Meal Routes
 
 
 const PORT = 3000;
