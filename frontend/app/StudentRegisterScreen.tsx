@@ -90,7 +90,7 @@ function UserRegisterScreen (){
             console.log("Response data:", response.data);
 
             if(response.status === 201){
-                Alert.alert("Registration Successful! Please Log in.");
+                Alert.alert("Registration Successful", "Your account has been created. Please log in.");
                 router.push("/StudentLoginScreen");
             }
           }catch(err: any){
