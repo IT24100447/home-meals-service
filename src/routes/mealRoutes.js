@@ -8,5 +8,6 @@ const router = Router();
 router.post("/", authMiddleware, upload.single('image'), mealController.createMeal);
 router.get("/mine", authMiddleware, mealController.getMyMeals);
 router.get("/", mealController.getAllMeals);
+router.delete("/:id", authMiddleware, mealController.removeMeal);
 
 export default router;

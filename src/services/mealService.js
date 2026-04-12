@@ -40,4 +40,17 @@ const createMeal = async (mealData, file, sellerId) => {
     }
 }
 
-export default { createMeal }
+const removeMeal = async (mealId) => {
+
+    const meal = await Meal.findById(mealId);
+
+    if (!meal) {
+        throw new Error("Meal Not Found");
+    }
+
+    await Meal.findByIdAndDelete(mealId);
+    console.log("Meal Has Been Deleted Sucessfully");
+    return meal;
+}
+
+export default { createMeal, removeMeal }
