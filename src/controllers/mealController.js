@@ -2,10 +2,8 @@ import mealService from "../services/mealService.js";
 
 const createMeal = async (req, res) => {
     try {
-        // req.user was populated by authMiddleware
-        const sellerId = req.user.id; 
-        
-        // Check if the user is a seller
+        const sellerId = req.user.id;
+
         if (req.user.role !== 'seller') {
             return res.status(403).json({
                 success: false,
@@ -14,7 +12,7 @@ const createMeal = async (req, res) => {
         }
 
         const meal = await mealService.createMeal(req.body, req.file, sellerId);
-        
+
         res.status(201).json({
             success: true,
             meal,
@@ -31,7 +29,6 @@ const createMeal = async (req, res) => {
 
 const getAllMeals = async (req, res) => {
     try {
-        // You can add filtering here (e.g. by city)
         const meals = await Meal.find().populate('sellerId', 'firstName lastName businessName city');
         res.status(200).json({
             success: true,

@@ -19,7 +19,7 @@ const createMeal = async (mealData, file, sellerId) => {
         }
 
         const meal = await Meal.create({
-            sellerId, // Associate meal with the logged-in seller
+            sellerId,
             mealName,
             description,
             category,
@@ -39,8 +39,5 @@ const createMeal = async (mealData, file, sellerId) => {
         throw new Error("Error Creating Meal");
     }
 }
-
-
-
 
 export default { createMeal }
