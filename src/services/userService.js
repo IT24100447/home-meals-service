@@ -4,14 +4,14 @@ import jwt from 'jsonwebtoken';
 
 
 //Register a New User
-const createUser = async(userData, file) => {
+const createUser = async (userData, file) => {
 
     const imageUrl = file ? file.path : 'https://res.cloudinary.com/ddo8xtk2a/image/upload/v1775966212/default-avatar-icon-of-social-media-user-vector_hrmo8x.jpg'; //Default image if no file is uploaded
-    const {firstName, lastName, email, password, phoneNumber, profileImage, address, role, description} = userData;
+    const { firstName, lastName, email, password, phoneNumber, address, role, description, businessName } = userData;
 
-    const existingUser = await User.findOne({email}); //Check if user already exists
+    const existingUser = await User.findOne({ email }); //Check if user already exists
 
-    if(existingUser) {
+    if (existingUser) {
         throw new Error("User already exists");
     }
 
@@ -26,35 +26,42 @@ const createUser = async(userData, file) => {
         address,
         role,
         description,
+        businessName,
         profileImage: imageUrl
     });
+
+    console.log("User successfully saved to database:", user._id);
+    const count = await User.countDocuments();
+    const allUsers = await User.find({}, "email");
+    console.log(`Total users in database now: ${count}`);
+    console.log("Registered Emails in this DB:", allUsers.map(u => u.email));
     return user;
 }
 
 
 //Find a User by email
-const findUserByEmail = async(inputemail) => {
+const findUserByEmail = async (inputemail) => {
 
-    const user = User.findOne({email:inputemail});
+    const user = User.findOne({ email: inputemail });
 
-    if(user) {
-        console.log("User Found!",user);
+    if (user) {
+        console.log("User Found!", user);
         return user;
     } else {
         console.log("User not found!");
         throw new Error("User not Found!");
     }
-    
+
 };
 
 //Check User Login
-const loginUser = async(userInput) => {
+const loginUser = async (userInput) => {
 
-    const {email , password} = userInput;
+    const { email, password } = userInput;
 
-    const user = await User.findOne({email: email}); 
+    const user = await User.findOne({ email: email });
 
-    if(!user){
+    if (!user) {
         console.log("Cannot find user");
         throw new Error(`No user with ${email} Exists`);
     }
@@ -62,14 +69,14 @@ const loginUser = async(userInput) => {
     //Check if the passwords matches
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if(!isPasswordValid){
+    if (!isPasswordValid) {
         console.log("Password does not match");
         throw new Error("Invalid email or password");
     }
 
     //Generate JWT Token
-    const token = jwt.sign({id: user._id, role: user.role}, process.env.JWT_KEY, {
-        expiresIn:"30d"
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_KEY, {
+        expiresIn: "30d"
     });
 
     console.log("Login successful");

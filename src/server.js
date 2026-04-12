@@ -1,12 +1,16 @@
-import 'dotenv/config'; // MUST be first - loads env vars before any other module runs
-import express from 'express';
+import 'dotenv/config';//hha
+import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import User from './models/user.model.js';
 import userRoutes from './routes/userRoutes.js';
+import { Router } from 'express';
 import CORS from 'cors';
+import express from 'express';
+
 
 const app = express();
 
-// Allow requests from any origin (needed for Expo Go on physical devices)
+
 app.use(CORS({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -22,22 +26,32 @@ app.use((req, res, next) => {
     next();
 });
 
-const connectDatabase = async() => {
-    try{
+const connectDatabase = async () => {
+    try {
         await mongoose.connect(process.env.DATABASE_URL);
         console.log("Database Connected");
-    } catch (err){
+    } catch (err) {
         console.log("Database Connection Failed! ", err);
     }
 };
 
 connectDatabase();
 
+const router = Router();
+
+router.get('/', async (req, res) => {
+    res.status(201).json({
+        message: "Test Endpoint Works"
+    });
+})
+
+
 app.use('/api/user', userRoutes); //User Routes
 
-const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, '0.0.0.0', () => {     // '0.0.0.0' makes it reachable from phone on same network
+const PORT = 3000;
+
+app.listen(PORT, '0.0.0.0', () => {     // '0.0.0.0' reachable from phone on same network
     console.log(`Server is Running on http://localhost:${PORT}`);
-    console.log(`Cloudinary Cloud: ${process.env.CLOUDINARY_CLOUD_NAME}`); // Verify env loaded
+    console.log(`Cloudinary Cloud: ${process.env.CLOUDINARY_CLOUD_NAME}`);
 });
