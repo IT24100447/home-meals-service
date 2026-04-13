@@ -83,13 +83,13 @@ const StudentDashboard = () => {
         fetchData();
     }, [location]);
 
-    const filteredMeals = meals.filter(meal => 
-        meal.mealName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const filteredMeals = meals.filter(meal =>
+        meal.mealName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         meal.sellerName.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const filteredSellers = sellers.filter(seller => 
-        seller.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const filteredSellers = sellers.filter(seller =>
+        seller.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         seller.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -114,19 +114,19 @@ const StudentDashboard = () => {
                 <View style={styles.header}>
                     <View>
                         <Text style={styles.locationLabel}>Location</Text>
-                        <TouchableOpacity 
-                            style={styles.locationSelector} 
+                        <TouchableOpacity
+                            style={styles.locationSelector}
                             onPress={() => setShowLocationModal(true)}
                         >
-                            <Ionicons name="location-sharp" size={20} color="#FF7622" />
+                            <Ionicons name="location-sharp" size={20} color="#30C65A" />
                             <Text style={styles.locationText}>{location}</Text>
                             <Ionicons name="chevron-down" size={16} color="#A0A0A0" />
                         </TouchableOpacity>
                     </View>
                     <TouchableOpacity style={styles.profileBtn}>
-                        <Image 
-                            source={{ uri: userData?.profileImage || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60' }} 
-                            style={styles.profileImage} 
+                        <Image
+                            source={{ uri: userData?.profileImage || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60' }}
+                            style={styles.profileImage}
                         />
                     </TouchableOpacity>
                 </View>
@@ -134,8 +134,8 @@ const StudentDashboard = () => {
                 {/* Search Bar */}
                 <View style={styles.searchContainer}>
                     <Ionicons name="search-outline" size={22} color="#A0A0A0" style={styles.searchIcon} />
-                    <TextInput 
-                        placeholder="Search for meals, cooks..." 
+                    <TextInput
+                        placeholder="Search for meals, cooks..."
                         style={styles.searchInput}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -156,9 +156,9 @@ const StudentDashboard = () => {
                                 <Text style={styles.seeAllText}>See All</Text>
                             </TouchableOpacity>
                         </View>
-                        <ScrollView 
-                            horizontal 
-                            showsHorizontalScrollIndicator={false} 
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
                             contentContainerStyle={styles.mealsList}
                         >
                             {filteredMeals.length > 0 ? (
@@ -201,8 +201,8 @@ const StudentDashboard = () => {
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Select Location</Text>
                         {LOCATIONS.map((loc) => (
-                            <TouchableOpacity 
-                                key={loc} 
+                            <TouchableOpacity
+                                key={loc}
                                 style={[styles.locationItem, location === loc && styles.activeLocationItem]}
                                 onPress={() => {
                                     setLocation(loc);
@@ -215,8 +215,8 @@ const StudentDashboard = () => {
                                 {location === loc && <Ionicons name="checkmark-circle" size={20} color="#30C65A" />}
                             </TouchableOpacity>
                         ))}
-                        <TouchableOpacity 
-                            style={styles.closeModalBtn} 
+                        <TouchableOpacity
+                            style={styles.closeModalBtn}
                             onPress={() => setShowLocationModal(false)}
                         >
                             <Text style={styles.closeModalBtnText}>Close</Text>
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     },
     seeAllText: {
         fontSize: 14,
-        color: '#FF7622',
+        color: '#30C65A',
         fontWeight: '600',
     },
     mealsList: {

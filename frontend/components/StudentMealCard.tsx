@@ -28,16 +28,16 @@ const StudentMealCard = ({ meal, onPress }: StudentMealCardProps) => {
 
             <View style={styles.content}>
                 <Text style={styles.title} numberOfLines={1}>{meal.mealName}</Text>
-                
+
                 <View style={styles.footer}>
                     <View style={styles.sellerInfo}>
-                        <Image 
-                            source={{ uri: meal.sellerImage || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=60' }} 
-                            style={styles.sellerImage} 
+                        <Image
+                            source={{ uri: meal.sellerImage || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=60' }}
+                            style={styles.sellerImage}
                         />
                         <Text style={styles.sellerName} numberOfLines={1}>{meal.sellerName}</Text>
                     </View>
-                    <Text style={styles.price}>${meal.price.toFixed(2)}</Text>
+                    <Text style={styles.price}>Rs.{meal.price.toFixed(2)}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     price: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#FF7622',
+        color: '#30C65A',
     },
 });
 
