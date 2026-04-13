@@ -6,8 +6,8 @@ import { upload } from '../services/cloudinaryConfig.js';
 const router = Router();
 
 router.post('/register', upload.single('profileImage'), userController.registerUser);
+router.get('/sellers', userController.getSellers);
 router.get('/:email', userController.findUserByEmail);
 router.post('/login', userController.userLogin);
-router.get('/sellers', userController.getSellers);
 
 export default router;

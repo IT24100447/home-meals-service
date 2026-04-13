@@ -100,6 +100,13 @@ const StudentDashboard = () => {
         });
     };
 
+    const handleSeeAllSellers = () => {
+        router.push({
+            pathname: '/AllSellersScreen' as any,
+            params: { location }
+        });
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -166,7 +173,7 @@ const StudentDashboard = () => {
                         {/* Sellers Section */}
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Sellers Near You</Text>
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={handleSeeAllSellers}>
                                 <Text style={styles.seeAllText}>See All</Text>
                             </TouchableOpacity>
                         </View>

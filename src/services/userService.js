@@ -39,7 +39,7 @@ const createUser = async (userData, file) => {
 //Find a User by email
 const findUserByEmail = async (inputemail) => {
 
-    const user = User.findOne({ email: inputemail });
+    const user = await User.findOne({ email: inputemail });
 
     if (user) {
         console.log("User Found!", user);
@@ -84,7 +84,7 @@ const loginUser = async (userInput) => {
 const getAllSellers = async (city) => {
     const query = { role: 'seller' };
     if (city) {
-        query.city = city;
+        query.city = { $regex: new RegExp(`^${city.trim()}$`, 'i') };
     }
     return await User.find(query).select('-password');
 };
