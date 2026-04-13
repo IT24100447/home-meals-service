@@ -81,4 +81,12 @@ const loginUser = async (userInput) => {
 
 }
 
-export default { createUser, findUserByEmail, loginUser };
+const getAllSellers = async (city) => {
+    const query = { role: 'seller' };
+    if (city) {
+        query.city = city;
+    }
+    return await User.find(query).select('-password');
+};
+
+export default { createUser, findUserByEmail, loginUser, getAllSellers };

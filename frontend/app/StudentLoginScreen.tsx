@@ -1,10 +1,12 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, SafeAreaView, ActivityIndicator, Platform } from 'react-native';
 import { useState } from 'react';
-import { Link } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
 
 function LoginScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,8 +25,23 @@ function LoginScreen() {
       });
 
       if (response.status === 200) {
+        const { token, user } = response.data;
+        
+        if (!token) throw new Error("No token received from server");
+
+        const tokenString = String(token);
+        const userString = JSON.stringify(user || {});
+
+        if (Platform.OS === 'web') {
+          localStorage.setItem('userToken', tokenString);
+          localStorage.setItem('userData', userString);
+        } else {
+          await SecureStore.setItemAsync('userToken', tokenString);
+          await SecureStore.setItemAsync('userData', userString);
+        }
+
         Alert.alert("Success", "Welcome back!");
-        console.log("User Data:", response.data);
+        router.replace('/StudentDashboard' as any);
       }
     } catch (err) {
       console.log("Error Login: ", err);

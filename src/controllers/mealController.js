@@ -43,10 +43,21 @@ const getMyMeals = async (req, res) => {
 
 const getAllMeals = async (req, res) => {
     try {
-        const meals = await Meal.find().populate('sellerId', 'firstName lastName businessName city');
+        const { city } = req.query;
+        let query = {};
+        
+        const meals = await Meal.find(query).populate({
+            path: 'sellerId',
+            select: 'firstName lastName businessName city profileImage',
+            match: city ? { city: new RegExp(`^${city}$`, 'i') } : {}
+        });
+
+        // Filter out meals where the seller didn't match the city (if city was provided)
+        const finalMeals = city ? meals.filter(meal => meal.sellerId !== null) : meals;
+
         res.status(200).json({
             success: true,
-            meals
+            meals: finalMeals
         });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

@@ -52,7 +52,8 @@ const userLogin = async (req, res) => {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 businessName: user.businessName,
-                city: user.city
+                city: user.city,
+                profileImage: user.profileImage
             },
             token: token
         });
@@ -65,4 +66,17 @@ const userLogin = async (req, res) => {
     };
 }
 
-export default { registerUser, findUserByEmail, userLogin };
+const getSellers = async (req, res) => {
+    try {
+        const { city } = req.query;
+        const sellers = await userService.getAllSellers(city);
+        res.status(200).json({
+            success: true,
+            sellers
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { registerUser, findUserByEmail, userLogin, getSellers };

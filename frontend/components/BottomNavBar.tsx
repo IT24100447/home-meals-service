@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 
-const BottomNavBar = ({ role = 'seller' }) => {
+const BottomNavBar = ({ role = 'seller' }: { role?: 'seller' | 'student' }) => {
     const router = useRouter();
     const pathname = usePathname();
 
@@ -15,9 +15,18 @@ const BottomNavBar = ({ role = 'seller' }) => {
         { name: 'Alerts', icon: 'notifications-outline', path: '/SellerAlerts' },
     ];
 
+    const studentTabs = [
+        { name: 'Home', icon: 'home-outline', path: '/StudentDashboard' },
+        { name: 'Orders', icon: 'list-outline', path: '/StudentOrders' },
+        { name: 'Requests', icon: 'create-outline', path: '/StudentRequests' },
+        { name: 'Alerts', icon: 'notifications-outline', path: '/StudentAlerts' },
+    ];
+
+    const tabs = role === 'seller' ? sellerTabs : studentTabs;
+
     return (
         <View style={styles.container}>
-            {sellerTabs.map((tab, index) => {
+            {tabs.map((tab, index) => {
                 const isActive = pathname.startsWith(tab.path);
                 return (
                     <TouchableOpacity 
