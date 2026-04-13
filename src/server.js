@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 import User from './models/user.model.js';
 import userRoutes from './routes/userRoutes.js';
 import mealRoutes from './routes/mealRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import alertRoutes from './routes/alertRoutes.js';
 import { Router } from 'express';
 import CORS from 'cors';
 import express from 'express';
@@ -50,6 +52,8 @@ router.get('/', async (req, res) => {
 
 app.use('/api/v1/users', userRoutes); //User Routes
 app.use('/api/v1/meals', mealRoutes); //Meal Routes
+app.use('/api/v1/orders', orderRoutes); //Order Routes
+app.use('/api/v1/alerts', alertRoutes); //Alert Routes
 
 
 const PORT = 3000;

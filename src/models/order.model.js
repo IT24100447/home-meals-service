@@ -10,7 +10,7 @@ const OrderSchema = new mongoose.Schema({
 
     sellerId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Seller",
+        ref: "User",
         required: true
     },
 
@@ -42,31 +42,26 @@ const OrderSchema = new mongoose.Schema({
 
     orderStatus: {
         type: String,
-        enum: ["pending",
-        "confirmed",
-        "preparing",
-        "out_for_delivery",
-        "delivered",
-        "cancelled",],
+        enum: ["pending", "confirmed", "preparing", "cancelled"],
         default: "pending"
     },
 
     paymentMethod: {
-      type: String,
-      enum: ["cash", "card"],
-      default: "cash",
+        type: String,
+        enum: ["cash", "card"],
+        default: "cash",
     },
 
     paymentStatus: {
-      type: String,
-      enum: ["pending", "paid", "failed", "refunded"],
-      default: "pending",
+        type: String,
+        enum: ["pending", "paid", "failed", "refunded"],
+        default: "pending",
     },
 
     specialInstructions: { type: String },
 
     cancelReason: { type: String },
-},{
+}, {
     timestamps: true
 });
 
