@@ -197,7 +197,13 @@ const MealDetailsScreen = () => {
                 </View>
                 <TouchableOpacity 
                     style={styles.orderButton}
-                    onPress={() => setShowOrderModal(true)}
+                    onPress={() => router.push({
+                        pathname: '/OrderScreen' as any,
+                        params: { 
+                            id: meal._id,
+                            quantity: quantity
+                        }
+                    })}
                 >
                     <Text style={styles.orderButtonText}>Order Now</Text>
                 </TouchableOpacity>

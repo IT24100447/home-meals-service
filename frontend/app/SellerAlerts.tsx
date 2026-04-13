@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, RefreshControl, Platform } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, RefreshControl, Platform, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import BottomNavBar from '../components/BottomNavBar';
+import { useRouter } from 'expo-router';
 
-const StudentAlerts = () => {
+const SellerAlerts = () => {
+    const router = useRouter();
     const [alerts, setAlerts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -20,7 +22,7 @@ const StudentAlerts = () => {
                 setAlerts(res.data.alerts);
             }
         } catch (err) {
-            console.error("Error fetching alerts:", err);
+            console.error("Error fetching seller alerts:", err);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -31,25 +33,32 @@ const StudentAlerts = () => {
         fetchAlerts();
     }, []);
 
-    const markAsRead = async (id: string) => {
+    const markAsRead = async (id: string, relatedId?: string) => {
         try {
             const token = Platform.OS === 'web' ? localStorage.getItem('token') : await SecureStore.getItemAsync('userToken');
             await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/alerts/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setAlerts(alerts.map(a => a._id === id ? { ...a, isRead: true } : a));
+            
+            if (relatedId) {
+                router.push('/SellerOrders' as any);
+            }
         } catch (err) {
             console.error("Error marking alert as read:", err);
         }
     };
 
     const renderAlertItem = ({ item }: { item: any }) => (
-        <View style={[styles.alertCard, !item.isRead && styles.unreadCard]}>
-            <View style={[styles.iconWrapper, { backgroundColor: item.title.includes('CANCELLED') ? '#FEEBEB' : '#E8F9EE' }]}>
+        <TouchableOpacity 
+            style={[styles.alertCard, !item.isRead && styles.unreadCard]}
+            onPress={() => markAsRead(item._id, item.relatedId)}
+        >
+            <View style={[styles.iconWrapper, { backgroundColor: item.title.includes('New Order') ? '#E8F9EE' : '#F5F6FA' }]}>
                 <Ionicons 
-                    name={item.title.includes('CANCELLED') ? "close-circle" : "notifications"} 
+                    name={item.title.includes('New Order') ? "cart" : "notifications"} 
                     size={24} 
-                    color={item.title.includes('CANCELLED') ? "#E74C3C" : "#30C65A"} 
+                    color={item.title.includes('New Order') ? "#30C65A" : "#7F8C8D"} 
                 />
             </View>
             <View style={styles.alertContent}>
@@ -60,13 +69,13 @@ const StudentAlerts = () => {
                 <Text style={styles.alertMessage} numberOfLines={2}>{item.message}</Text>
             </View>
             {!item.isRead && <View style={styles.unreadDot} />}
-        </View>
+        </TouchableOpacity>
     );
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Notifications</Text>
+                <Text style={styles.title}>Seller Notifications</Text>
             </View>
 
             {loading ? (
@@ -83,13 +92,13 @@ const StudentAlerts = () => {
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
                             <Ionicons name="notifications-off-outline" size={80} color="#F0F0F0" />
-                            <Text style={styles.emptyTitle}>No notifications yet</Text>
-                            <Text style={styles.emptySubtitle}>We'll notify you when your order status changes.</Text>
+                            <Text style={styles.emptyTitle}>No notifications</Text>
+                            <Text style={styles.emptySubtitle}>You'll see alerts for new orders and system updates here.</Text>
                         </View>
                     }
                 />
             )}
-            <BottomNavBar role="student" />
+            <BottomNavBar role="seller" />
         </SafeAreaView>
     );
 };
@@ -125,4 +134,4 @@ const styles = StyleSheet.create({
     emptySubtitle: { fontSize: 14, color: '#A0A0A0', marginTop: 10, textAlign: 'center' }
 });
 
-export default StudentAlerts;
+export default SellerAlerts;
