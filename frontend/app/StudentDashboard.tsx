@@ -180,7 +180,14 @@ const StudentDashboard = () => {
                         <View style={styles.sellersList}>
                             {filteredSellers.length > 0 ? (
                                 filteredSellers.map(seller => (
-                                    <SellerCard key={seller.id} seller={seller} />
+                                    <SellerCard 
+                                        key={seller.id} 
+                                        seller={seller} 
+                                        onPress={() => router.push({
+                                            pathname: '/SellerDetailsScreen' as any,
+                                            params: { id: seller.id }
+                                        })}
+                                    />
                                 ))
                             ) : (
                                 <Text style={styles.noDataText}>No sellers found in {location}</Text>

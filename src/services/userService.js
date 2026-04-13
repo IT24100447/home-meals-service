@@ -89,4 +89,8 @@ const getAllSellers = async (city) => {
     return await User.find(query).select('-password');
 };
 
-export default { createUser, findUserByEmail, loginUser, getAllSellers };
+const getSellerById = async (id) => {
+    return await User.findById(id).select('-password');
+};
+
+export default { createUser, findUserByEmail, loginUser, getAllSellers, getSellerById };

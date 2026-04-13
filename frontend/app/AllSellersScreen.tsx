@@ -73,7 +73,13 @@ const AllSellersScreen = () => {
                     data={filteredSellers}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <SellerCard seller={item} />
+                        <SellerCard 
+                            seller={item} 
+                            onPress={() => router.push({
+                                pathname: '/SellerDetailsScreen' as any,
+                                params: { id: item.id }
+                            })}
+                        />
                     )}
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={

@@ -98,4 +98,17 @@ const removeMeal = async (req, res) => {
     }
 }
 
-export default { createMeal, getAllMeals, getMyMeals, updateMeal, removeMeal };
+const getMealsBySeller = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const meals = await Meal.find({ sellerId: id });
+        res.status(200).json({
+            success: true,
+            meals
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { createMeal, getAllMeals, getMyMeals, updateMeal, removeMeal, getMealsBySeller };

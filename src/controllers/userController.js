@@ -79,4 +79,19 @@ const getSellers = async (req, res) => {
     }
 };
 
-export default { registerUser, findUserByEmail, userLogin, getSellers };
+const getSellerProfile = async (req, res) => {
+    try {
+        const seller = await userService.getSellerById(req.params.id);
+        if (!seller) {
+            return res.status(404).json({ success: false, message: "Seller not found" });
+        }
+        res.status(200).json({
+            success: true,
+            seller
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile };

@@ -7,6 +7,7 @@ const router = Router();
 
 router.post('/register', upload.single('profileImage'), userController.registerUser);
 router.get('/sellers', userController.getSellers);
+router.get('/sellers/:id', userController.getSellerProfile);
 router.get('/:email', userController.findUserByEmail);
 router.post('/login', userController.userLogin);
 
