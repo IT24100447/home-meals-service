@@ -9,6 +9,7 @@ router.post("/", authMiddleware, upload.single('image'), mealController.createMe
 router.get("/mine", authMiddleware, mealController.getMyMeals);
 router.get("/", mealController.getAllMeals);
 router.get("/seller/:id", mealController.getMealsBySeller);
+router.get("/:id", mealController.getMealById);
 router.put("/:id", authMiddleware, upload.single('image'), mealController.updateMeal);
 router.delete("/:id", authMiddleware, mealController.removeMeal);
 

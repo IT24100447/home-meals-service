@@ -1,5 +1,7 @@
 import mealService from "../services/mealService.js";
 import Meal from "../models/meal.model.js";
+import Review from "../models/review.model.js";
+import User from "../models/user.model.js";
 
 const createMeal = async (req, res) => {
     try {
@@ -111,4 +113,26 @@ const getMealsBySeller = async (req, res) => {
     }
 };
 
-export default { createMeal, getAllMeals, getMyMeals, updateMeal, removeMeal, getMealsBySeller };
+const getMealById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const meal = await Meal.findById(id).populate('sellerId', 'firstName lastName businessName profileImage description city');
+        
+        if (!meal) {
+            return res.status(404).json({ success: false, message: "Meal not found" });
+        }
+
+        // Fetch reviews for this meal
+        const reviews = await Review.find({ mealId: id }).populate('userId', 'firstName lastName profileImage');
+        
+        res.status(200).json({
+            success: true,
+            meal,
+            reviews
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { createMeal, getAllMeals, getMyMeals, updateMeal, removeMeal, getMealsBySeller, getMealById };
