@@ -95,7 +95,14 @@ const SellerDetailsScreen = () => {
                     
                     <View style={styles.mealsGrid}>
                         {meals.map((item) => (
-                            <TouchableOpacity key={item._id} style={styles.mealCard}>
+                            <TouchableOpacity 
+                                key={item._id} 
+                                style={styles.mealCard}
+                                onPress={() => router.push({
+                                    pathname: '/MealDetailsScreen' as any,
+                                    params: { id: item._id }
+                                })}
+                            >
                                 <Image source={{ uri: item.image }} style={styles.mealImage} />
                                 <View style={styles.mealRatingBadge}>
                                     <Ionicons name="star" size={12} color="#FFD700" />

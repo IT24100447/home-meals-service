@@ -163,7 +163,14 @@ const StudentDashboard = () => {
                         >
                             {filteredMeals.length > 0 ? (
                                 filteredMeals.map(meal => (
-                                    <StudentMealCard key={meal.id} meal={meal} />
+                                    <StudentMealCard 
+                                        key={meal.id} 
+                                        meal={meal} 
+                                        onPress={() => router.push({
+                                            pathname: '/MealDetailsScreen' as any,
+                                            params: { id: meal.id }
+                                        })}
+                                    />
                                 ))
                             ) : (
                                 <Text style={styles.noDataText}>No meals found in {location}</Text>

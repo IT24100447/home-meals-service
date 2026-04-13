@@ -95,7 +95,13 @@ const AllMealsScreen = () => {
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <View style={styles.cardWrapper}>
-                            <StudentMealCard meal={item} />
+                            <StudentMealCard 
+                                meal={item} 
+                                onPress={() => router.push({
+                                    pathname: '/MealDetailsScreen' as any,
+                                    params: { id: item.id }
+                                })}
+                            />
                         </View>
                     )}
                     contentContainerStyle={styles.listContent}
