@@ -36,9 +36,11 @@ function LoginScreen() {
         if (Platform.OS === 'web') {
           localStorage.setItem('userToken', tokenString);
           localStorage.setItem('userData', userString);
+          localStorage.setItem('userId', user.id);
         } else {
           await SecureStore.setItemAsync('userToken', tokenString);
           await SecureStore.setItemAsync('userData', userString);
+          await SecureStore.setItemAsync('userId', user.id);
         }
 
         Alert.alert("Welcome!", "You have successfully logged in.");
