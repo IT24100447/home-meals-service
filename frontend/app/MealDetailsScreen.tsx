@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, ActivityIndicator, TextInput, Modal, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, ActivityIndicator, TextInput, Modal, Alert, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
 import BottomNavBar from '../components/BottomNavBar';
 
 const { width } = Dimensions.get('window');
@@ -16,6 +18,9 @@ const MealDetailsScreen = () => {
     const [quantity, setQuantity] = useState(1);
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [reviewText, setReviewText] = useState('');
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewImage, setReviewImage] = useState<string | null>(null);
+    const [postingReview, setPostingReview] = useState(false);
 
     useEffect(() => {
         const fetchMealDetails = async () => {
@@ -45,6 +50,98 @@ const MealDetailsScreen = () => {
             setShowOrderModal(false);
         } catch (err) {
             Alert.alert("Error", "Failed to place order");
+        }
+    };
+
+    const pickReviewImage = async () => {
+        const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (result.granted === false) {
+            Alert.alert("Permission Required", "Permission to access camera roll is required!");
+            return;
+        }
+
+        let pickerResult = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!pickerResult.canceled) {
+            setReviewImage(pickerResult.assets[0].uri);
+        }
+    };
+
+    const handlePostReview = async () => {
+        if (reviewRating === 0) {
+            Alert.alert("Required", "Please select a rating.");
+            return;
+        }
+        if (!reviewImage) {
+            Alert.alert("Required", "Please upload a photo of the meal to add a review.");
+            return;
+        }
+
+        setPostingReview(true);
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            let userId = Platform.OS === 'web' ? localStorage.getItem('userId') : await SecureStore.getItemAsync('userId');
+            
+            // Fallback if userId not saved separately
+            if (!userId) {
+                const userData = Platform.OS === 'web' ? localStorage.getItem('userData') : await SecureStore.getItemAsync('userData');
+                if (userData) {
+                    const parsed = JSON.parse(userData);
+                    userId = parsed.id;
+                }
+            }
+
+            const formData = new FormData();
+            formData.append('userId', userId || '');
+            formData.append('sellerId', meal.sellerId._id);
+            formData.append('mealId', meal._id);
+            formData.append('rating', reviewRating.toString());
+            formData.append('comment', reviewText);
+            
+            if (reviewImage) {
+                const filename = reviewImage.split('/').pop();
+                const match = /\.(\w+)$/.exec(filename || '');
+                const type = match ? `image/${match[1]}` : `image`;
+                
+                if (Platform.OS !== 'web') {
+                    formData.append('reviewPhoto', {
+                        uri: reviewImage,
+                        name: filename,
+                        type,
+                    } as any);
+                } else {
+                    const response = await fetch(reviewImage);
+                    const blob = await response.blob();
+                    formData.append('reviewPhoto', blob, filename);
+                }
+            }
+
+            const res = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/reviews/post-review`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (res.status === 201) {
+                Alert.alert("Success", "Review posted successfully!");
+                setReviewText('');
+                setReviewRating(0);
+                setReviewImage(null);
+                // Refresh reviews
+                const reviewFetch = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/${id}`);
+                if (reviewFetch.data.success) setReviews(reviewFetch.data.reviews);
+            }
+        } catch (error: any) {
+            console.error("Error posting review:", error);
+            Alert.alert("Error", error.response?.data?.message || "Failed to post review.");
+        } finally {
+            setPostingReview(false);
         }
     };
 
@@ -154,6 +251,9 @@ const MealDetailsScreen = () => {
                                         </View>
                                     </View>
                                     <Text style={styles.reviewComment}>{review.comment}</Text>
+                                    {review.reviewPhoto && (
+                                        <Image source={{ uri: review.reviewPhoto }} style={styles.reviewPhoto} />
+                                    )}
                                 </View>
                             </View>
                         ))
@@ -163,6 +263,20 @@ const MealDetailsScreen = () => {
 
                     {/* Add Review */}
                     <Text style={styles.sectionTitle}>Add a Review</Text>
+                    
+                    {/* Star Rating Selection */}
+                    <View style={styles.starRow}>
+                        {[1,2,3,4,5].map(star => (
+                            <TouchableOpacity key={star} onPress={() => setReviewRating(star)}>
+                                <Ionicons 
+                                    name={star <= reviewRating ? "star" : "star-outline"} 
+                                    size={30} 
+                                    color={star <= reviewRating ? "#FFD700" : "#D1D1D1"} 
+                                />
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+
                     <View style={styles.addReviewContainer}>
                         <TextInput 
                             style={styles.reviewInput}
@@ -171,10 +285,31 @@ const MealDetailsScreen = () => {
                             onChangeText={setReviewText}
                             multiline
                         />
-                        <TouchableOpacity style={styles.postButton}>
-                            <Text style={styles.postButtonText}>Post</Text>
-                        </TouchableOpacity>
                     </View>
+
+                    {/* Image Upload for Review */}
+                    <TouchableOpacity style={styles.reviewImagePicker} onPress={pickReviewImage}>
+                        {reviewImage ? (
+                            <Image source={{ uri: reviewImage }} style={styles.reviewImagePreview} />
+                        ) : (
+                            <View style={styles.pickerPlaceholder}>
+                                <Ionicons name="camera" size={24} color="#30C65A" />
+                                <Text style={styles.pickerText}>Add Meal Photo</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity 
+                        style={[styles.postButton, (!reviewImage || reviewRating === 0) && styles.disabledPostButton]}
+                        onPress={handlePostReview}
+                        disabled={postingReview || !reviewImage || reviewRating === 0}
+                    >
+                        {postingReview ? (
+                            <ActivityIndicator color="#FFF" />
+                        ) : (
+                            <Text style={styles.postButtonText}>Post Review</Text>
+                        )}
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
 
@@ -465,6 +600,12 @@ const styles = StyleSheet.create({
         color: '#7F8C8D',
         lineHeight: 20,
     },
+    reviewPhoto: {
+        width: '100%',
+        height: 150,
+        borderRadius: 15,
+        marginTop: 10,
+    },
     noReviews: {
         textAlign: 'center',
         color: '#A0A0A0',
@@ -495,6 +636,40 @@ const styles = StyleSheet.create({
     postButtonText: {
         color: '#FFFFFF',
         fontWeight: 'bold',
+    },
+    disabledPostButton: {
+        backgroundColor: '#D1D1D1',
+    },
+    starRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginVertical: 10,
+    },
+    reviewImagePicker: {
+        width: '100%',
+        height: 150,
+        backgroundColor: '#F5FFF7',
+        borderRadius: 20,
+        borderWidth: 2,
+        borderColor: '#30C65A',
+        borderStyle: 'dashed',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+        overflow: 'hidden',
+    },
+    reviewImagePreview: {
+        width: '100%',
+        height: '100%',
+    },
+    pickerPlaceholder: {
+        alignItems: 'center',
+    },
+    pickerText: {
+        marginTop: 5,
+        color: '#30C65A',
+        fontWeight: 'bold',
+        fontSize: 12,
     },
     bottomBar: {
         position: 'absolute',

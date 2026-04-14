@@ -14,7 +14,9 @@ const SellerDetailsScreen = () => {
     const { id } = useLocalSearchParams();
     const [seller, setSeller] = useState<any>(null);
     const [meals, setMeals] = useState<any[]>([]);
+    const [reviews, setReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('menu'); // 'menu' or 'reviews'
 
     useEffect(() => {
         const fetchSellerData = async () => {
@@ -31,6 +33,10 @@ const SellerDetailsScreen = () => {
                 if (mealsRes.data.success) {
                     setMeals(mealsRes.data.meals);
                 }
+
+                // Fetch Reviews
+                const reviewsRes = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/reviews/seller/${id}`);
+                setReviews(reviewsRes.data);
             } catch (err) {
                 console.error("Error fetching seller details:", err);
             } finally {
@@ -82,7 +88,7 @@ const SellerDetailsScreen = () => {
                         
                         <View style={styles.ratingBadge}>
                             <Ionicons name="star" size={16} color="#FFD700" />
-                            <Text style={styles.ratingText}>4.8</Text>
+                            <Text style={styles.ratingText}>{seller.averageRating ? seller.averageRating.toFixed(1) : "0.0"} ({seller.totalReviews || 0})</Text>
                         </View>
                         
                         <Text style={styles.description}>{seller.description || 'Authentic homemade meals prepared with love.'}</Text>
@@ -106,7 +112,7 @@ const SellerDetailsScreen = () => {
                                 <Image source={{ uri: item.image }} style={styles.mealImage} />
                                 <View style={styles.mealRatingBadge}>
                                     <Ionicons name="star" size={12} color="#FFD700" />
-                                    <Text style={styles.mealRatingText}>4.9</Text>
+                                    <Text style={styles.mealRatingText}>{item.averageRating ? item.averageRating.toFixed(1) : "New"}</Text>
                                 </View>
                                 <View style={styles.mealInfo}>
                                     <Text style={styles.mealName} numberOfLines={1}>{item.mealName}</Text>
@@ -115,6 +121,38 @@ const SellerDetailsScreen = () => {
                             </TouchableOpacity>
                         ))}
                     </View>
+                </View>
+
+                {/* Reviews Section */}
+                <View style={styles.reviewsSection}>
+                    <Text style={styles.sectionTitle}>What Students Say ({reviews.length})</Text>
+                    
+                    {reviews.length === 0 ? (
+                        <Text style={styles.emptyReviewsText}>No reviews for this seller yet.</Text>
+                    ) : (
+                        reviews.map((rev) => (
+                            <View key={rev._id} style={styles.reviewItem}>
+                                <View style={styles.reviewHeaderRow}>
+                                    <Image 
+                                        source={rev.userId?.profileImage ? { uri: rev.userId.profileImage } : require('../assets/images/react-logo.png')} 
+                                        style={styles.revAvatar} 
+                                    />
+                                    <View style={styles.revInfo}>
+                                        <Text style={styles.revName}>{rev.userId?.firstName} {rev.userId?.lastName}</Text>
+                                        <Text style={styles.revDate}>{new Date(rev.createdAt).toLocaleDateString()}</Text>
+                                    </View>
+                                    <View style={styles.revRatingBadge}>
+                                        <Ionicons name="star" size={12} color="#FFD700" />
+                                        <Text style={styles.revRatingText}>{rev.rating}</Text>
+                                    </View>
+                                </View>
+                                <Text style={styles.revComment}>{rev.comment}</Text>
+                                {rev.reviewPhoto && (
+                                    <Image source={{ uri: rev.reviewPhoto }} style={styles.revPhoto} />
+                                )}
+                            </View>
+                        ))
+                    ) }
                 </View>
             </ScrollView>
             <BottomNavBar role="student" />
@@ -281,6 +319,69 @@ const styles = StyleSheet.create({
         color: '#E67E22',
         fontWeight: 'bold',
     },
+    reviewsSection: {
+        padding: 20,
+    },
+    emptyReviewsText: {
+        color: '#7F8C8D',
+        fontStyle: 'italic',
+        textAlign: 'center',
+        marginTop: 10,
+    },
+    reviewItem: {
+        backgroundColor: '#F9F9FB',
+        padding: 15,
+        borderRadius: 20,
+        marginBottom: 15,
+    },
+    reviewHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    revAvatar: {
+        width: 35,
+        height: 35,
+        borderRadius: 17.5,
+    },
+    revInfo: {
+        flex: 1,
+        marginLeft: 10,
+    },
+    revName: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#1A1C1E',
+    },
+    revDate: {
+        fontSize: 10,
+        color: '#A0A0A0',
+    },
+    revRatingBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFF9E6',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+    },
+    revRatingText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        marginLeft: 3,
+        color: '#FFD700',
+    },
+    revComment: {
+        fontSize: 14,
+        color: '#4A4A4A',
+        lineHeight: 20,
+    },
+    revPhoto: {
+        width: '100%',
+        height: 120,
+        borderRadius: 15,
+        marginTop: 10,
+    }
 });
 
 export default SellerDetailsScreen;

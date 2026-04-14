@@ -66,7 +66,25 @@ const StudentOrders = () => {
                         <Text style={styles.mealName}>{mealItem.mealId.mealName}</Text>
                         <Text style={styles.mealQty}>Quantity: {mealItem.quantity}</Text>
                     </View>
-                    <Text style={styles.mealPrice}>RS.{item.totalPayment.toFixed(2)}</Text>
+                    <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={styles.mealPrice}>RS.{item.totalPayment.toFixed(2)}</Text>
+                        {item.orderStatus === 'confirmed' && (
+                            <TouchableOpacity 
+                                style={styles.reviewMiniBtn}
+                                onPress={() => router.push({
+                                    pathname: '/PostReviewScreen',
+                                    params: { 
+                                        mealId: mealItem.mealId._id,
+                                        sellerId: item.sellerId._id,
+                                        orderId: item._id,
+                                        mealName: mealItem.mealId.mealName
+                                    }
+                                } as any)}
+                            >
+                                <Text style={styles.reviewMiniBtnText}>Add Review</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
             ))}
 
@@ -151,7 +169,21 @@ const styles = StyleSheet.create({
     emptyTitle: { fontSize: 20, fontWeight: 'bold', color: '#1A1C1E', marginTop: 20 },
     emptySubtitle: { fontSize: 14, color: '#A0A0A0', marginTop: 10 },
     shopBtn: { marginTop: 30, backgroundColor: '#30C65A', paddingHorizontal: 30, paddingVertical: 15, borderRadius: 15 },
-    shopBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 }
+    shopBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+    reviewMiniBtn: { 
+        marginTop: 5, 
+        backgroundColor: '#F5FFF7', 
+        paddingHorizontal: 12, 
+        paddingVertical: 6, 
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#30C65A'
+    },
+    reviewMiniBtnText: { 
+        color: '#30C65A', 
+        fontSize: 11, 
+        fontWeight: 'bold' 
+    }
 });
 
 export default StudentOrders;
