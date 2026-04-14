@@ -16,7 +16,7 @@ const AlertSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ["order", "payment", "general"],
+        enum: ["order", "payment", "general", "review"],
         default: "general"
     },
     isRead: {

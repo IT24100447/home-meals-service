@@ -94,4 +94,19 @@ const getSellerProfile = async (req, res) => {
     }
 };
 
-export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile };
+const getProfile = async (req, res) => {
+    try {
+        const user = await userService.getSellerById(req.user.id); // Reusing getSellerById as it fetch user by ID
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile, getProfile };

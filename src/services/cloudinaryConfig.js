@@ -12,7 +12,10 @@ const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
         // Determine folder based on request URL
-        const folderName = req.baseUrl.includes('meal') ? "meals" : "profile_pics";
+        let folderName = "others";
+        if (req.originalUrl.includes("meal")) folderName = "meals";
+        else if (req.originalUrl.includes("user")) folderName = "profile_pics";
+        else if (req.originalUrl.includes("review")) folderName = "reviews";
         
         return {
             folder: folderName,

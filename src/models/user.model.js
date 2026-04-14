@@ -57,6 +57,11 @@ const UserSchema = new mongoose.Schema({
         default: 0
     },
 
+    averageRating: {
+        type: Number,
+        default: 0
+    },
+
     businessName: {
         type: String
     },

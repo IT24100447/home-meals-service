@@ -10,7 +10,7 @@ const ReviewSchema = new mongoose.Schema({
 
     sellerId: {
          type: mongoose.Schema.Types.ObjectId,
-        ref: "Seller",
+        ref: "User",
         required: true
     },
 
@@ -22,8 +22,7 @@ const ReviewSchema = new mongoose.Schema({
 
     orderId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+        ref: "Order"
     },
 
     rating: {
@@ -35,6 +34,11 @@ const ReviewSchema = new mongoose.Schema({
 
     comment:{
         type: String
+    },
+
+    reviewPhoto: {
+        type: String,
+        required: true
     },
 
     sellerReply: {
