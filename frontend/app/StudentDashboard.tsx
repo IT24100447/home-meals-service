@@ -17,6 +17,7 @@ const StudentDashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [location, setLocation] = useState('Colombo');
     const [showLocationModal, setShowLocationModal] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [userData, setUserData] = useState<any>(null);
     const [meals, setMeals] = useState<any[]>([]);
     const [sellers, setSellers] = useState<any[]>([]);
@@ -123,7 +124,7 @@ const StudentDashboard = () => {
                             <Ionicons name="chevron-down" size={16} color="#A0A0A0" />
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity style={styles.profileBtn}>
+                    <TouchableOpacity style={styles.profileBtn} onPress={() => setShowProfileMenu(true)}>
                         <Image
                             source={{ uri: userData?.profileImage || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60' }}
                             style={styles.profileImage}
@@ -237,6 +238,33 @@ const StudentDashboard = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
+            </Modal>
+
+            {/* Profile Menu Modal */}
+            <Modal visible={showProfileMenu} transparent={true} animationType="fade" onRequestClose={() => setShowProfileMenu(false)}>
+                <TouchableOpacity style={styles.menuOverlay} activeOpacity={1} onPress={() => setShowProfileMenu(false)}>
+                    <View style={styles.profileMenu}>
+                        <TouchableOpacity style={styles.menuItem} onPress={() => { setShowProfileMenu(false); router.push('/EditProfileScreen' as any); }}>
+                            <Ionicons name="person-outline" size={20} color="#1A1C1E" />
+                            <Text style={styles.menuItemText}>Edit Profile</Text>
+                        </TouchableOpacity>
+                        <View style={styles.menuDivider} />
+                        <TouchableOpacity style={styles.menuItem} onPress={() => { 
+                            setShowProfileMenu(false); 
+                            if (Platform.OS === 'web') {
+                                localStorage.removeItem('userToken');
+                                localStorage.removeItem('userData');
+                            } else {
+                                SecureStore.deleteItemAsync('userToken'); 
+                                SecureStore.deleteItemAsync('userData'); 
+                            }
+                            router.replace('/'); 
+                        }}>
+                            <Ionicons name="log-out-outline" size={20} color="#E74C3C" />
+                            <Text style={[styles.menuItemText, { color: '#E74C3C' }]}>Sign Out</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
             </Modal>
 
             <BottomNavBar role="student" />
@@ -398,6 +426,41 @@ const styles = StyleSheet.create({
         marginTop: 15,
         color: '#7F8C8D',
         fontSize: 14,
+    },
+    menuOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+    },
+    profileMenu: {
+        position: 'absolute',
+        top: 80,
+        right: 20,
+        backgroundColor: '#FFF',
+        borderRadius: 15,
+        padding: 10,
+        width: 160,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+    },
+    menuItemText: {
+        fontSize: 16,
+        color: '#1A1C1E',
+        marginLeft: 10,
+        fontWeight: '500',
+    },
+    menuDivider: {
+        height: 1,
+        backgroundColor: '#F0F0F0',
+        marginVertical: 5,
     }
 });
 

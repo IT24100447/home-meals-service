@@ -109,4 +109,17 @@ const getProfile = async (req, res) => {
     }
 };
 
-export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile, getProfile };
+const updateProfile = async (req, res) => {
+    try {
+        const updatedUser = await userService.updateUserProfile(req.user.id, req.body, req.file);
+        res.status(200).json({
+            success: true,
+            user: updatedUser,
+            message: "Profile updated successfully"
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile, getProfile, updateProfile };

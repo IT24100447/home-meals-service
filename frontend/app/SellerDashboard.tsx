@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, ActivityIndicator, RefreshControl, Platform, FlatList } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Image, ActivityIndicator, RefreshControl, Platform, FlatList, Modal, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { useRouter } from 'expo-router';
 import BottomNavBar from '../components/BottomNavBar';
 
 const SellerDashboard = () => {
+    const router = useRouter();
     const [sellerData, setSellerData] = useState<any>(null);
     const [reviews, setReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -95,10 +98,12 @@ const SellerDashboard = () => {
                         <Text style={styles.welcomeText}>Welcome back,</Text>
                         <Text style={styles.sellerName}>{sellerData?.firstName} {sellerData?.lastName}</Text>
                     </View>
-                    <Image 
-                        source={sellerData?.profileImage ? { uri: sellerData.profileImage } : require('../assets/images/react-logo.png')} 
-                        style={styles.profilePic} 
-                    />
+                    <TouchableOpacity onPress={() => setShowProfileMenu(true)}>
+                        <Image 
+                            source={sellerData?.profileImage ? { uri: sellerData.profileImage } : require('../assets/images/react-logo.png')} 
+                            style={styles.profilePic} 
+                        />
+                    </TouchableOpacity>
                 </View>
 
                 {/* Stats Section */}
@@ -141,6 +146,33 @@ const SellerDashboard = () => {
                 
                 <View style={{ height: 100 }} />
             </ScrollView>
+
+            <Modal visible={showProfileMenu} transparent={true} animationType="fade" onRequestClose={() => setShowProfileMenu(false)}>
+                <TouchableOpacity style={styles.menuOverlay} activeOpacity={1} onPress={() => setShowProfileMenu(false)}>
+                    <View style={styles.profileMenu}>
+                        <TouchableOpacity style={styles.menuItem} onPress={() => { setShowProfileMenu(false); router.push('/EditProfileScreen' as any); }}>
+                            <Ionicons name="person-outline" size={20} color="#1A1C1E" />
+                            <Text style={styles.menuItemText}>Edit Profile</Text>
+                        </TouchableOpacity>
+                        <View style={styles.menuDivider} />
+                        <TouchableOpacity style={styles.menuItem} onPress={() => { 
+                            setShowProfileMenu(false); 
+                            if (Platform.OS === 'web') {
+                                localStorage.removeItem('userToken');
+                                localStorage.removeItem('userId');
+                            } else {
+                                SecureStore.deleteItemAsync('userToken'); 
+                                SecureStore.deleteItemAsync('userId'); 
+                            }
+                            router.replace('/'); 
+                        }}>
+                            <Ionicons name="log-out-outline" size={20} color="#E74C3C" />
+                            <Text style={[styles.menuItemText, { color: '#E74C3C' }]}>Sign Out</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
             <BottomNavBar role="seller" />
         </SafeAreaView>
     );
@@ -227,7 +259,42 @@ const styles = StyleSheet.create({
     commentText: { fontSize: 14, color: '#4A4A4A', lineHeight: 20 },
     reviewImage: { width: '100%', height: 150, borderRadius: 15, marginTop: 12 },
     emptyReviews: { alignItems: 'center', marginTop: 50 },
-    emptyText: { marginTop: 15, color: '#A0A0A0', fontSize: 16 }
+    emptyText: { marginTop: 15, color: '#A0A0A0', fontSize: 16 },
+    menuOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+    },
+    profileMenu: {
+        position: 'absolute',
+        top: 80,
+        right: 20,
+        backgroundColor: '#FFF',
+        borderRadius: 15,
+        padding: 10,
+        width: 160,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    menuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+    },
+    menuItemText: {
+        fontSize: 16,
+        color: '#1A1C1E',
+        marginLeft: 10,
+        fontWeight: '500',
+    },
+    menuDivider: {
+        height: 1,
+        backgroundColor: '#F0F0F0',
+        marginVertical: 5,
+    }
 });
 
 export default SellerDashboard;

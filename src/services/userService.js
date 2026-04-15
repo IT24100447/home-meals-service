@@ -93,4 +93,26 @@ const getSellerById = async (id) => {
     return await User.findById(id).select('-password');
 };
 
-export default { createUser, findUserByEmail, loginUser, getAllSellers, getSellerById };
+const updateUserProfile = async (userId, updateData, file) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error("User not found");
+
+    if (file) {
+        user.profileImage = file.path;
+    }
+
+    const { firstName, lastName, phoneNumber, address, city, description, businessName } = updateData;
+    
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (address) user.address = address;
+    if (city) user.city = city;
+    if (description) user.description = description;
+    if (businessName) user.businessName = businessName;
+
+    await user.save();
+    return user;
+};
+
+export default { createUser, findUserByEmail, loginUser, getAllSellers, getSellerById, updateUserProfile };

@@ -11,5 +11,5 @@ router.get('/sellers/:id', userController.getSellerProfile);
 router.get('/profile', authMiddleware, userController.getProfile);
 router.get('/:email', userController.findUserByEmail);
 router.post('/login', userController.userLogin);
-
+router.put('/profile', authMiddleware, upload.single('profileImage'), userController.updateProfile);
 export default router;
