@@ -107,9 +107,23 @@ const SellerRequests = () => {
                 </View>
             )}
 
-            <TouchableOpacity style={styles.acceptBtn} onPress={() => handleAccept(item._id)}>
-                <Text style={styles.acceptBtnText}>Accept Request</Text>
-            </TouchableOpacity>
+            {item.status === 'pending' ? (
+                <TouchableOpacity style={styles.acceptBtn} onPress={() => handleAccept(item._id)}>
+                    <Text style={styles.acceptBtnText}>Accept Request</Text>
+                </TouchableOpacity>
+            ) : (
+                <View style={styles.acceptedContainer}>
+                    <Ionicons name="checkmark-circle" size={24} color="#30C65A" />
+                    <View>
+                        <Text style={styles.acceptedTitle}>Accepted by You</Text>
+                        {item.userId?.phoneNumber && (
+                            <Text style={styles.acceptedContact}>
+                                Student Contact: {item.userId.phoneNumber}
+                            </Text>
+                        )}
+                    </View>
+                </View>
+            )}
         </View>
     );
 
@@ -169,6 +183,9 @@ const styles = StyleSheet.create({
     prescriptionImage: { width: '100%', height: 180, borderRadius: 15 },
     acceptBtn: { backgroundColor: '#30C65A', padding: 16, borderRadius: 15, alignItems: 'center' },
     acceptBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+    acceptedContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#E8F9EE', padding: 15, borderRadius: 15, gap: 10 },
+    acceptedTitle: { color: '#30C65A', fontWeight: 'bold', fontSize: 15 },
+    acceptedContact: { color: '#27AE60', fontSize: 14, marginTop: 4, fontWeight: '500' },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
     emptyText: { marginTop: 20, fontSize: 16, color: '#A0A0A0' }
 });

@@ -37,10 +37,15 @@ const createMealRequest = async (requestData, file, userId, userCity) => {
   }
 };
 
-const getAvailableMealRequests = async (city) => {
+const getAvailableMealRequests = async (city, sellerId) => {
   try {
-    // Return pending requests in the seller's city
-    return await MealRequest.find({ city, status: "pending" }).populate("userId", "firstName lastName phoneNumber");
+    // Return pending requests in the seller's city OR requests accepted by this seller
+    return await MealRequest.find({
+      $or: [
+        { city, status: "pending" },
+        { matchedSellerId: sellerId, status: "accepted" }
+      ]
+    }).populate("userId", "firstName lastName phoneNumber");
   } catch (err) {
     console.error("Error fetching meal requests:", err);
     throw new Error("Error fetching meal requests");

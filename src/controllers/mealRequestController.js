@@ -24,7 +24,8 @@ const createRequest = async (req, res) => {
 const getAvailableRequests = async (req, res) => {
   try {
     const city = req.user.city; // Seller's city
-    const requests = await mealRequestService.getAvailableMealRequests(city);
+    const sellerId = req.user.id;
+    const requests = await mealRequestService.getAvailableMealRequests(city, sellerId);
     res.status(200).json({ success: true, requests });
   } catch (err) {
     console.error("Get Available Requests Error:", err);

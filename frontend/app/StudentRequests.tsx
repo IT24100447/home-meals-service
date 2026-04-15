@@ -168,10 +168,17 @@ const StudentRequests = () => {
 
             {item.status === 'accepted' && item.matchedSellerId && (
                 <View style={styles.sellerInfo}>
-                    <Ionicons name="checkmark-circle" size={20} color="#30C65A" />
-                    <Text style={styles.sellerText}>
-                        Accepted by: <Text style={{ fontWeight: 'bold' }}>{item.matchedSellerId.businessName || item.matchedSellerId.firstName}</Text>
-                    </Text>
+                    <Ionicons name="checkmark-circle" size={24} color="#30C65A" />
+                    <View style={{ flex: 1 }}>
+                        <Text style={styles.sellerText}>
+                            Accepted by: <Text style={{ fontWeight: 'bold' }}>{item.matchedSellerId.businessName || item.matchedSellerId.firstName}</Text>
+                        </Text>
+                        {item.matchedSellerId.phoneNumber && (
+                            <Text style={[styles.sellerText, { marginTop: 4, fontWeight: 'bold' }]}>
+                                Seller Contact: {item.matchedSellerId.phoneNumber}
+                            </Text>
+                        )}
+                    </View>
                 </View>
             )}
 
