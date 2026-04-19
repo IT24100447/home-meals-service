@@ -60,7 +60,7 @@ app.use('/api/v1/reviews', reviewRoutes); //Review Routes
 app.use('/api/v1/meal-requests', mealRequestRoutes); //Meal Request Routes
 
 
-const PORT = 3000;
+const PORT = 3000; 
 
 app.listen(PORT, '0.0.0.0', () => {     // '0.0.0.0' reachable from phone on same network
     console.log(`Server is Running on http://localhost:${PORT}`);
