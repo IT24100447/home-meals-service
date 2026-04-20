@@ -13,7 +13,7 @@ const EditProfileScreen = () => {
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
     const [user, setUser] = useState<any>(null);
-    
+
     // Form fields
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -83,13 +83,13 @@ const EditProfileScreen = () => {
         try {
             const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
             const formData = new FormData();
-            
+
             formData.append('firstName', firstName);
             formData.append('lastName', lastName);
             formData.append('phoneNumber', phoneNumber);
             formData.append('city', city);
             formData.append('address', address);
-            
+
             if (user?.role === 'seller') {
                 formData.append('businessName', businessName);
                 formData.append('description', description);
@@ -109,9 +109,9 @@ const EditProfileScreen = () => {
             }
 
             const res = await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/profile`, formData, {
-                headers: { 
+                headers: {
                     'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}` 
+                    Authorization: `Bearer ${token}`
                 }
             });
 
@@ -155,9 +155,9 @@ const EditProfileScreen = () => {
             <ScrollView contentContainerStyle={styles.content}>
                 <View style={styles.imageSection}>
                     <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
-                        <Image 
-                            source={{ uri: image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=60' }} 
-                            style={styles.profileImg} 
+                        <Image
+                            source={{ uri: image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=60' }}
+                            style={styles.profileImg}
                         />
                         <View style={styles.cameraIcon}>
                             <Ionicons name="camera" size={20} color="#FFF" />
@@ -178,7 +178,7 @@ const EditProfileScreen = () => {
                     </View>
 
                     <Text style={styles.label}>Phone Number</Text>
-                    <TextInput style={styles.input} value={phoneNumber} onChangeText={setPhoneNumber} placeholder="07XXXXXXXX" keyboardType="phone-pad" />
+                    <TextInput style={styles.input} value={phoneNumber} onChangeText={setPhoneNumber} placeholder="Phone Number" keyboardType="phone-pad" />
 
                     <Text style={styles.label}>City</Text>
                     <View style={styles.cityRow}>
