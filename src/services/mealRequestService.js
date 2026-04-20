@@ -83,9 +83,34 @@ const acceptMealRequest = async (requestId, sellerId) => {
   }
 };
 
+const fulfillMealRequest = async (requestId, sellerId) => {
+  try {
+    const request = await MealRequest.findById(requestId);
+    if (!request) {
+      throw new Error("Meal request not found");
+    }
+    if (request.status !== "accepted") {
+      throw new Error("Only accepted requests can be fulfilled");
+    }
+    if (request.matchedSellerId.toString() !== sellerId.toString()) {
+      throw new Error("You are not authorized to fulfill this request");
+    }
+
+    request.status = "fulfilled";
+    await request.save();
+
+    console.log("Meal Request marked as fulfilled");
+    return request;
+  } catch (err) {
+    console.error("Error fulfilling meal request:", err);
+    throw new Error(err.message || "Error fulfilling meal request");
+  }
+};
+
 export default {
   createMealRequest,
   getAvailableMealRequests,
   getStudentMealRequests,
   acceptMealRequest,
+  fulfillMealRequest,
 };

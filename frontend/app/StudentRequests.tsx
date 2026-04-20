@@ -103,6 +103,9 @@ const StudentRequests = () => {
             formData.append('quantityNeeded', quantity);
             formData.append('city', city);
             formData.append('deliveryLocation', location);
+            if (date) {
+                formData.append('neededDate', date);
+            }
             if (selectedSellerId) {
                 formData.append('matchedSellerId', selectedSellerId);
             }
@@ -132,7 +135,7 @@ const StudentRequests = () => {
                 setShowModal(false);
                 fetchMyRequests();
                 // Reset form
-                setMealName(''); setDescription(''); setBudget(''); setQuantity(''); setImage(null);
+                setMealName(''); setDescription(''); setBudget(''); setQuantity(''); setDate(''); setCity(''); setImage(null);
             }
         } catch (err: any) {
             Alert.alert("Error", err.response?.data?.message || "Failed to post request");
@@ -148,8 +151,8 @@ const StudentRequests = () => {
                     <Text style={styles.cardTitle}>{item.requestedMealName}</Text>
                     <Text style={styles.cardSubtitle}>{item.preferredCategory} • {item.preferredMealType}</Text>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: item.status === 'pending' ? '#FFF9E6' : '#E8F9EE' }]}>
-                    <Text style={[styles.statusText, { color: item.status === 'pending' ? '#F39C12' : '#30C65A' }]}>
+                <View style={[styles.statusBadge, { backgroundColor: item.status === 'pending' ? '#FFF9E6' : item.status === 'fulfilled' ? '#F0F0F0' : '#E8F9EE' }]}>
+                    <Text style={[styles.statusText, { color: item.status === 'pending' ? '#F39C12' : item.status === 'fulfilled' ? '#7F8C8D' : '#30C65A' }]}>
                         {item.status.toUpperCase()}
                     </Text>
                 </View>
@@ -164,17 +167,27 @@ const StudentRequests = () => {
                     <Ionicons name="location-outline" size={16} color="#7F8C8D" />
                     <Text style={styles.detailText}>{item.city}</Text>
                 </View>
+                {item.neededDate && (
+                    <View style={styles.detailItem}>
+                        <Ionicons name="calendar-outline" size={16} color="#7F8C8D" />
+                        <Text style={styles.detailText}>{new Date(item.neededDate).toLocaleDateString()}</Text>
+                    </View>
+                )}
             </View>
 
-            {item.status === 'accepted' && item.matchedSellerId && (
-                <View style={styles.sellerInfo}>
-                    <Ionicons name="checkmark-circle" size={24} color="#30C65A" />
+            {(item.status === 'accepted' || item.status === 'fulfilled') && item.matchedSellerId && (
+                <View style={[styles.sellerInfo, item.status === 'fulfilled' && { backgroundColor: '#F8F9FA' }]}>
+                    <Ionicons 
+                        name={item.status === 'fulfilled' ? "checkbox" : "checkmark-circle"} 
+                        size={24} 
+                        color={item.status === 'fulfilled' ? "#7F8C8D" : "#30C65A"} 
+                    />
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.sellerText}>
-                            Accepted by: <Text style={{ fontWeight: 'bold' }}>{item.matchedSellerId.businessName || item.matchedSellerId.firstName}</Text>
+                        <Text style={[styles.sellerText, item.status === 'fulfilled' && { color: '#7F8C8D' }]}>
+                            {item.status === 'fulfilled' ? 'Delivered by:' : 'Accepted by:'} <Text style={{ fontWeight: 'bold' }}>{item.matchedSellerId.businessName || item.matchedSellerId.firstName}</Text>
                         </Text>
                         {item.matchedSellerId.phoneNumber && (
-                            <Text style={[styles.sellerText, { marginTop: 4, fontWeight: 'bold' }]}>
+                            <Text style={[styles.sellerText, { marginTop: 4, fontWeight: 'bold' }, item.status === 'fulfilled' && { color: '#7F8C8D' }]}>
                                 Seller Contact: {item.matchedSellerId.phoneNumber}
                             </Text>
                         )}
@@ -244,6 +257,9 @@ const StudentRequests = () => {
                                 <TextInput style={styles.input} value={quantity} onChangeText={setQuantity} keyboardType="numeric" placeholder="1" />
                             </View>
                         </View>
+
+                        <Text style={styles.label}>Date Needed (e.g. 2024-05-20)</Text>
+                        <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" />
 
                         <Text style={styles.label}>City (e.g. Colombo)</Text>
                         <TextInput style={styles.input} value={city} onChangeText={setCity} placeholder="Which city are you in?" />

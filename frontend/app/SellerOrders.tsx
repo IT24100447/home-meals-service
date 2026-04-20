@@ -109,7 +109,7 @@ const SellerOrders = () => {
             <View style={styles.actionRow}>
                 {item.orderStatus === 'pending' && (
                     <>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={[styles.actionBtn, styles.declineBtn]}
                             onPress={() => {
                                 setSelectedOrder(item);
@@ -118,7 +118,7 @@ const SellerOrders = () => {
                         >
                             <Text style={styles.declineBtnText}>Decline</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             style={[styles.actionBtn, styles.acceptBtn]}
                             onPress={() => handleStatusUpdate(item._id, 'confirmed')}
                         >
@@ -127,7 +127,7 @@ const SellerOrders = () => {
                     </>
                 )}
                 {item.orderStatus === 'confirmed' && (
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         style={[styles.actionBtn, styles.prepareBtn]}
                         onPress={() => handleStatusUpdate(item._id, 'preparing')}
                     >
@@ -144,7 +144,7 @@ const SellerOrders = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Customer Orders</Text>
+                <Text style={styles.title}>My Orders</Text>
             </View>
 
             {loading ? (
@@ -174,7 +174,7 @@ const SellerOrders = () => {
                     <View style={styles.modalContent}>
                         <Text style={styles.modalTitle}>Decline Order</Text>
                         <Text style={styles.modalLabel}>Please provide a reason for cancelling:</Text>
-                        <TextInput 
+                        <TextInput
                             style={styles.modalInput}
                             placeholder="e.g. Out of ingredients, too busy..."
                             value={cancelReason}
@@ -185,8 +185,8 @@ const SellerOrders = () => {
                             <TouchableOpacity style={styles.modalCancel} onPress={() => setShowCancelModal(false)}>
                                 <Text style={styles.modalCancelText}>Back</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity 
-                                style={styles.modalConfirm} 
+                            <TouchableOpacity
+                                style={styles.modalConfirm}
                                 onPress={() => handleStatusUpdate(selectedOrder._id, 'cancelled', cancelReason)}
                             >
                                 <Text style={styles.modalConfirmText}>Confirm Decline</Text>

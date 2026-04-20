@@ -12,5 +12,6 @@ router.get("/my-requests", authMiddleware, mealRequestController.getMyRequests);
 // Seller routes
 router.get("/available", authMiddleware, mealRequestController.getAvailableRequests);
 router.put("/accept/:id", authMiddleware, mealRequestController.acceptRequest);
+router.put("/fulfill/:id", authMiddleware, mealRequestController.fulfillRequest);
 
 export default router;

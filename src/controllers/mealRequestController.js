@@ -60,9 +60,26 @@ const acceptRequest = async (req, res) => {
   }
 };
 
+const fulfillRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sellerId = req.user.id;
+    const request = await mealRequestService.fulfillMealRequest(id, sellerId);
+    res.status(200).json({
+      success: true,
+      request,
+      message: "Meal request fulfilled successfully",
+    });
+  } catch (err) {
+    console.error("Fulfill Request Error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export default {
   createRequest,
   getAvailableRequests,
   getMyRequests,
   acceptRequest,
+  fulfillRequest,
 };

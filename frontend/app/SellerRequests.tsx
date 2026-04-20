@@ -44,8 +44,8 @@ const SellerRequests = () => {
             "Are you sure you want to accept this custom meal request?",
             [
                 { text: "Cancel", style: "cancel" },
-                { 
-                    text: "Accept", 
+                {
+                    text: "Accept",
                     onPress: async () => {
                         try {
                             const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
@@ -58,6 +58,33 @@ const SellerRequests = () => {
                             }
                         } catch (err: any) {
                             Alert.alert("Error", err.response?.data?.message || "Failed to accept");
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
+    const handleFulfill = async (requestId: string) => {
+        Alert.alert(
+            "Fulfill Request",
+            "Mark this request as fulfilled?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Fulfill",
+                    onPress: async () => {
+                        try {
+                            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+                            const res = await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meal-requests/fulfill/${requestId}`, {}, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
+                            if (res.data.success) {
+                                Alert.alert("Success", "Request fulfilled! Thank you for your service.");
+                                fetchAvailableRequests();
+                            }
+                        } catch (err: any) {
+                            Alert.alert("Error", err.response?.data?.message || "Failed to fulfill");
                         }
                     }
                 }
@@ -98,6 +125,12 @@ const SellerRequests = () => {
                     <Text style={styles.detailLabel}>Type</Text>
                     <Text style={styles.detailValue}>{item.preferredMealType?.toUpperCase()}</Text>
                 </View>
+                {item.neededDate && (
+                    <View style={styles.detailBox}>
+                        <Text style={styles.detailLabel}>Needed Date</Text>
+                        <Text style={styles.detailValue}>{new Date(item.neededDate).toLocaleDateString()}</Text>
+                    </View>
+                )}
             </View>
 
             {item.prescriptionImage && (
@@ -111,16 +144,29 @@ const SellerRequests = () => {
                 <TouchableOpacity style={styles.acceptBtn} onPress={() => handleAccept(item._id)}>
                     <Text style={styles.acceptBtnText}>Accept Request</Text>
                 </TouchableOpacity>
+            ) : item.status === 'accepted' ? (
+                <View>
+                    <View style={styles.acceptedContainer}>
+                        <Ionicons name="checkmark-circle" size={24} color="#30C65A" />
+                        <View>
+                            <Text style={styles.acceptedTitle}>Accepted by You</Text>
+                            {item.userId?.phoneNumber && (
+                                <Text style={styles.acceptedContact}>
+                                    Student Contact: {item.userId.phoneNumber}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+                    <TouchableOpacity style={[styles.acceptBtn, { marginTop: 10, backgroundColor: '#3498DB' }]} onPress={() => handleFulfill(item._id)}>
+                        <Text style={styles.acceptBtnText}>Mark as Fulfilled</Text>
+                    </TouchableOpacity>
+                </View>
             ) : (
-                <View style={styles.acceptedContainer}>
-                    <Ionicons name="checkmark-circle" size={24} color="#30C65A" />
+                <View style={[styles.acceptedContainer, { backgroundColor: '#F0F0F0' }]}>
+                    <Ionicons name="checkbox" size={24} color="#7F8C8D" />
                     <View>
-                        <Text style={styles.acceptedTitle}>Accepted by You</Text>
-                        {item.userId?.phoneNumber && (
-                            <Text style={styles.acceptedContact}>
-                                Student Contact: {item.userId.phoneNumber}
-                            </Text>
-                        )}
+                        <Text style={[styles.acceptedTitle, { color: '#7F8C8D' }]}>Request Fulfilled</Text>
+                        <Text style={{ fontSize: 12, color: '#A0A0A0' }}>Thank you for completing this request.</Text>
                     </View>
                 </View>
             )}
