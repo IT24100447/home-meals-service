@@ -67,9 +67,9 @@ const SellerOrders = () => {
         <View style={styles.orderCard}>
             <View style={styles.cardHeader}>
                 <View style={styles.studentInfo}>
-                    <Image source={{ uri: item.userId.profileImage }} style={styles.studentImage} />
+                    <Image source={{ uri: item.userId?.profileImage || `https://ui-avatars.com/api/?name=${item.userId?.firstName || 'U'}&background=30C65A&color=fff` }} style={styles.studentImage} />
                     <View>
-                        <Text style={styles.studentName}>{item.userId.firstName} {item.userId.lastName}</Text>
+                        <Text style={styles.studentName}>{item.userId?.firstName || 'Unknown'} {item.userId?.lastName || 'User'}</Text>
                         <Text style={styles.orderTime}>{new Date(item.createdAt).toLocaleTimeString()} · {new Date(item.createdAt).toLocaleDateString()}</Text>
                     </View>
                 </View>
@@ -84,8 +84,8 @@ const SellerOrders = () => {
 
             {item.items.map((mealItem: any, idx: number) => (
                 <View key={idx} style={styles.mealRow}>
-                    <Text style={styles.mealName}>{mealItem.mealId.mealName} x {mealItem.quantity}</Text>
-                    <Text style={styles.mealPrice}>RS.{(mealItem.mealId.price * mealItem.quantity).toFixed(2)}</Text>
+                    <Text style={styles.mealName}>{mealItem.mealId?.mealName || 'Deleted Meal'} x {mealItem.quantity}</Text>
+                    <Text style={styles.mealPrice}>RS.{((mealItem.mealId?.price || 0) * mealItem.quantity).toFixed(2)}</Text>
                 </View>
             ))}
 

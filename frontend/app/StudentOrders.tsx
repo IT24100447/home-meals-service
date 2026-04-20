@@ -61,21 +61,21 @@ const StudentOrders = () => {
 
             {item.items.map((mealItem: any, idx: number) => (
                 <View key={idx} style={styles.mealInfo}>
-                    <Image source={{ uri: mealItem.mealId.image }} style={styles.mealImage} />
+                    <Image source={{ uri: mealItem.mealId?.image || 'https://img.freepik.com/free-photo/fresh-delicious-meal-plate-with-vegetables_23-2148189874.jpg' }} style={styles.mealImage} />
                     <View style={styles.mealDetails}>
-                        <Text style={styles.mealName}>{mealItem.mealId.mealName}</Text>
+                        <Text style={styles.mealName}>{mealItem.mealId?.mealName || 'Deleted Meal'}</Text>
                         <Text style={styles.mealQty}>Quantity: {mealItem.quantity}</Text>
                     </View>
                     <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={styles.mealPrice}>RS.{item.totalPayment.toFixed(2)}</Text>
-                        {item.orderStatus === 'confirmed' && (
+                        <Text style={styles.mealPrice}>RS.{(item.totalPayment || 0).toFixed(2)}</Text>
+                        {item.orderStatus === 'confirmed' && mealItem.mealId && (
                             <TouchableOpacity 
                                 style={styles.reviewMiniBtn}
                                 onPress={() => router.push({
                                     pathname: '/PostReviewScreen',
                                     params: { 
                                         mealId: mealItem.mealId._id,
-                                        sellerId: item.sellerId._id,
+                                        sellerId: item.sellerId?._id,
                                         orderId: item._id,
                                         mealName: mealItem.mealId.mealName
                                     }
@@ -91,7 +91,7 @@ const StudentOrders = () => {
             <View style={styles.orderFooter}>
                 <View style={styles.sellerRow}>
                     <Ionicons name="restaurant-outline" size={16} color="#7F8C8D" />
-                    <Text style={styles.sellerName}>{item.sellerId.businessName}</Text>
+                    <Text style={styles.sellerName}>{item.sellerId?.businessName || 'Unknown Seller'}</Text>
                 </View>
                 {item.orderStatus === 'cancelled' && item.cancelReason && (
                     <Text style={styles.cancelReason}>Reason: {item.cancelReason}</Text>
