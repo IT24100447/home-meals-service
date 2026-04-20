@@ -51,6 +51,8 @@ router.get('/', async (req, res) => {
     });
 })
 
+app.use('/', router);
+
 
 app.use('/api/v1/users', userRoutes); //User Routes
 app.use('/api/v1/meals', mealRoutes); //Meal Routes
