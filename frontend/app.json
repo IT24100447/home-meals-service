@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "LoginApp",
-    "slug": "LoginApp",
+    "name": "HomeBites",
+    "slug": "home-bites",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "loginapp",
+    "scheme": "homebites",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
