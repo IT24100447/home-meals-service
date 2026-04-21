@@ -33,7 +33,7 @@ function LoginScreen() {
         const tokenString = String(token);
         const userString = JSON.stringify(user || {});
 
-        if (Platform.OS === 'web') {
+        if (Platform.OS === 'web') { //For desktops
           localStorage.setItem('userToken', tokenString);
           localStorage.setItem('userData', userString);
           localStorage.setItem('userId', user.id);
