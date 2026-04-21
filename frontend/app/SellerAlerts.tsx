@@ -22,7 +22,7 @@ const SellerAlerts = () => {
                 setAlerts(res.data.alerts);
             }
         } catch (err) {
-            console.error("Error fetching seller alerts:", err);
+            console.error("Error fetching seller alerts:", err); //Test Comment
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -40,7 +40,7 @@ const SellerAlerts = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setAlerts(alerts.map(a => a._id === id ? { ...a, isRead: true } : a));
-            
+
             if (relatedId) {
                 router.push('/SellerOrders' as any);
             }
@@ -50,15 +50,15 @@ const SellerAlerts = () => {
     };
 
     const renderAlertItem = ({ item }: { item: any }) => (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={[styles.alertCard, !item.isRead && styles.unreadCard]}
             onPress={() => markAsRead(item._id, item.relatedId)}
         >
             <View style={[styles.iconWrapper, { backgroundColor: item.title.includes('New Order') ? '#E8F9EE' : '#F5F6FA' }]}>
-                <Ionicons 
-                    name={item.title.includes('New Order') ? "cart" : "notifications"} 
-                    size={24} 
-                    color={item.title.includes('New Order') ? "#30C65A" : "#7F8C8D"} 
+                <Ionicons
+                    name={item.title.includes('New Order') ? "cart" : "notifications"}
+                    size={24}
+                    color={item.title.includes('New Order') ? "#30C65A" : "#7F8C8D"}
                 />
             </View>
             <View style={styles.alertContent}>
