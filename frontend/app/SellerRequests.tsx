@@ -177,7 +177,7 @@ const SellerRequests = () => {
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Student Meal Requests</Text>
-                <Text style={styles.headerSubtitle}>Personalized meal needs in your area</Text>
+                <Text style={styles.headerSubtitle}>Request Meals by Students in your area</Text>
             </View>
 
             {loading ? (
