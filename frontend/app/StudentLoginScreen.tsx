@@ -9,6 +9,7 @@ function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -90,10 +91,17 @@ function LoginScreen() {
               <TextInput
                 placeholder='••••••••'
                 placeholderTextColor="#A0A0A0"
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 style={styles.input}
                 value={password}
                 onChangeText={setPassword} />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                <Ionicons 
+                  name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                  size={20} 
+                  color="#A0A0A0" 
+                />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -177,6 +185,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     fontSize: 16,
     color: '#1A1C1E',
+  },
+  eyeIcon: {
+    padding: 5,
   },
   loginButton: {
     backgroundColor: '#30C65A',

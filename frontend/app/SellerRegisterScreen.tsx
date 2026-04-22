@@ -10,7 +10,9 @@ function UserRegisterScreen() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
   const role = 'seller';
@@ -352,14 +354,23 @@ function UserRegisterScreen() {
             {/* ── Password with live strength checklist ── */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Password <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={[styles.input]}
-                placeholder="••••••••"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                onBlur={() => markTouched('password')}
-              />
+              <View style={[styles.inputWrapper]}>
+                <TextInput
+                  style={[styles.passwordInput]}
+                  placeholder="••••••••"
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
+                  onBlur={() => markTouched('password')}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                  <Ionicons 
+                    name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                    size={20} 
+                    color="#A0A0A0" 
+                  />
+                </TouchableOpacity>
+              </View>
               {password.length > 0 && (
                 <View style={styles.passwordChecklist}>
                   <ValidationRow valid={passwordChecks.length} label="8–12 characters" />
@@ -377,14 +388,23 @@ function UserRegisterScreen() {
             {/* ── Confirm Password with match indicator ── */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Confirm Password <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={[styles.input, confirmPassword.length > 0 && (passwordsMatch ? styles.inputSuccess : styles.inputError)]}
-                placeholder="••••••••"
-                secureTextEntry
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                onBlur={() => markTouched('confirmPassword')}
-              />
+              <View style={[styles.inputWrapper, confirmPassword.length > 0 && (passwordsMatch ? styles.inputSuccess : styles.inputError)]}>
+                <TextInput
+                  style={[styles.passwordInput]}
+                  placeholder="••••••••"
+                  secureTextEntry={!showConfirmPassword}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  onBlur={() => markTouched('confirmPassword')}
+                />
+                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+                  <Ionicons 
+                    name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} 
+                    size={20} 
+                    color="#A0A0A0" 
+                  />
+                </TouchableOpacity>
+              </View>
               {confirmPassword.length > 0 && (
                 <View style={styles.matchIndicator}>
                   <Ionicons
@@ -578,6 +598,24 @@ const styles = StyleSheet.create({
   inputSuccess: {
     borderColor: '#30C65A',
     borderWidth: 1.5,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9F9F9',
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    borderRadius: 15,
+    paddingHorizontal: 15,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 15,
+    fontSize: 16,
+    color: '#1A1C1E',
+  },
+  eyeIcon: {
+    padding: 5,
   },
   textArea: {
     height: 80,
