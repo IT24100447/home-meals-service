@@ -52,7 +52,8 @@ const StudentDashboard = () => {
                     name: s.businessName || `${s.firstName} ${s.lastName}`,
                     description: s.description || 'Verified Home Cook',
                     image: s.profileImage || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60',
-                    rating: 4.8 // Mock rating if not in DB
+                    phoneNumber: s.phoneNumber,
+                    rating: s.averageRating || 4.8 
                 }));
                 setSellers(formattedSellers);
             }

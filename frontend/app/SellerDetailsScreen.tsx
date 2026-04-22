@@ -92,6 +92,11 @@ const SellerDetailsScreen = () => {
                         </View>
                         
                         <Text style={styles.description}>{seller.description || 'Authentic homemade meals prepared with love.'}</Text>
+                        
+                        <View style={styles.contactInfo}>
+                            <Ionicons name="call-outline" size={16} color="#30C65A" />
+                            <Text style={styles.phoneNumber}>{seller.phoneNumber || 'N/A'}</Text>
+                        </View>
                     </View>
                 </View>
 
@@ -253,6 +258,22 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         paddingHorizontal: 40,
         lineHeight: 20,
+        marginBottom: 10,
+    },
+    contactInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#E8F9EE',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 12,
+        marginTop: 5,
+    },
+    phoneNumber: {
+        marginLeft: 8,
+        fontSize: 15,
+        fontWeight: 'bold',
+        color: '#1A1C1E',
     },
     menuSection: {
         padding: 20,

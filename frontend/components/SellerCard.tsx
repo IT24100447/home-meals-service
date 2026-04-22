@@ -8,6 +8,7 @@ interface SellerCardProps {
         name: string;
         description: string;
         image: string;
+        phoneNumber: string | number;
         rating: number;
     };
     onPress?: () => void;
@@ -16,16 +17,19 @@ interface SellerCardProps {
 const SellerCard = ({ seller, onPress }: SellerCardProps) => {
     return (
         <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
-            <Image 
-                source={{ uri: seller.image || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60' }} 
-                style={styles.image} 
+            <Image
+                source={{ uri: seller.image || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60' }}
+                style={styles.image}
             />
             <View style={styles.content}>
                 <Text style={styles.name}>{seller.name}</Text>
                 <Text style={styles.description} numberOfLines={1}>{seller.description}</Text>
-                <View style={styles.ratingInfo}>
-                    <Ionicons name="star" size={14} color="#FFD700" />
-                    <Text style={styles.ratingText}>{seller.rating}</Text>
+                <View style={styles.sellerFooter}>
+                    <View style={styles.ratingInfo}>
+                        <Ionicons name="star" size={14} color="#FFD700" />
+                        <Text style={styles.ratingText}>{seller.rating}</Text>
+                    </View>
+
                 </View>
             </View>
         </TouchableOpacity>
@@ -77,6 +81,22 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: 'bold',
         color: '#1A1C1E',
+        marginLeft: 4,
+    },
+    sellerFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 5,
+    },
+    contactInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    phoneText: {
+        fontSize: 12,
+        color: '#30C65A',
+        fontWeight: 'bold',
         marginLeft: 4,
     },
 });
