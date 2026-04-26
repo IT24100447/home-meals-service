@@ -22,7 +22,8 @@ function LoginScreen() {
     try {
       const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/login`, {
         email: email,
-        password: password
+        password: password,
+        role: 'student'
       });
 
       if (response.status === 200) {
@@ -46,9 +47,10 @@ function LoginScreen() {
         Alert.alert("Success", "Welcome back!");
         router.replace('/StudentDashboard' as any);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.log("Error Login: ", err);
-      Alert.alert("Login Failed", "Invalid email or password");
+      const errorMessage = err.response?.data?.Error || "Invalid email or password";
+      Alert.alert("Login Failed", errorMessage);
     } finally {
       setLoading(false);
     }

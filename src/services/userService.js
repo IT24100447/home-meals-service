@@ -54,13 +54,19 @@ const findUserByEmail = async (inputemail) => {
 //Check User Login
 const loginUser = async (userInput) => {
 
-    const { email, password } = userInput;
+    const { email, password, role } = userInput;
 
     const user = await User.findOne({ email: email });
 
     if (!user) {
         console.log("Cannot find user");
         throw new Error(`No user with ${email} Exists`);
+    }
+
+    // Check if the role matches if provided
+    if (role && user.role !== role) {
+        console.log(`Role mismatch: expected ${role}, found ${user.role}`);
+        throw new Error(`Unauthorized: This account is registered as a ${user.role}, not a ${role}.`);
     }
 
     //Check if the passwords matches
