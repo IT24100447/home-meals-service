@@ -11,6 +11,7 @@ const SellerRequests = () => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [requests, setRequests] = useState<any[]>([]);
+    const [activeTab, setActiveTab] = useState<'pending' | 'fulfilled'>('pending');
 
     const fetchAvailableRequests = async () => {
         try {
@@ -180,11 +181,30 @@ const SellerRequests = () => {
                 <Text style={styles.headerSubtitle}>Request Meals by Students in your area</Text>
             </View>
 
+            <View style={styles.tabContainer}>
+                <TouchableOpacity 
+                    style={[styles.tab, activeTab === 'pending' && styles.activeTab]} 
+                    onPress={() => setActiveTab('pending')}
+                >
+                    <Text style={[styles.tabText, activeTab === 'pending' && styles.activeTabText]}>Pending</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    style={[styles.tab, activeTab === 'fulfilled' && styles.activeTab]} 
+                    onPress={() => setActiveTab('fulfilled')}
+                >
+                    <Text style={[styles.tabText, activeTab === 'fulfilled' && styles.activeTabText]}>Fulfilled</Text>
+                </TouchableOpacity>
+            </View>
+
             {loading ? (
                 <ActivityIndicator size="large" color="#30C65A" style={{ marginTop: 50 }} />
             ) : (
                 <FlatList
-                    data={requests}
+                    data={requests.filter(req => 
+                        activeTab === 'pending' 
+                            ? (req.status === 'pending' || req.status === 'accepted') 
+                            : req.status === 'fulfilled'
+                    )}
                     renderItem={renderRequestCard}
                     keyExtractor={(item) => item._id}
                     contentContainerStyle={styles.listContent}
@@ -192,7 +212,11 @@ const SellerRequests = () => {
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
                             <Ionicons name="documents-outline" size={80} color="#F0F0F0" />
-                            <Text style={styles.emptyText}>No requests in your city right now.</Text>
+                            <Text style={styles.emptyText}>
+                                {activeTab === 'pending' 
+                                    ? "No pending requests in your city right now." 
+                                    : "You haven't fulfilled any requests yet."}
+                            </Text>
                         </View>
                     }
                 />
@@ -233,7 +257,36 @@ const styles = StyleSheet.create({
     acceptedTitle: { color: '#30C65A', fontWeight: 'bold', fontSize: 15 },
     acceptedContact: { color: '#27AE60', fontSize: 14, marginTop: 4, fontWeight: '500' },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
-    emptyText: { marginTop: 20, fontSize: 16, color: '#A0A0A0' }
+    emptyText: { marginTop: 20, fontSize: 16, color: '#A0A0A0' },
+    tabContainer: {
+        flexDirection: 'row',
+        paddingHorizontal: 20,
+        marginTop: 20,
+        gap: 10
+    },
+    tab: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 15,
+        backgroundColor: '#FFF',
+        alignItems: 'center',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5
+    },
+    activeTab: {
+        backgroundColor: '#30C65A',
+    },
+    tabText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#7F8C8D'
+    },
+    activeTabText: {
+        color: '#FFF'
+    }
 });
 
 export default SellerRequests;
