@@ -43,7 +43,8 @@ const getAvailableMealRequests = async (city, sellerId) => {
     return await MealRequest.find({
       $or: [
         { city, status: "pending" },
-        { matchedSellerId: sellerId, status: "accepted" }
+        { matchedSellerId: sellerId, status: "accepted" },
+        { matchedSellerId: sellerId, status: "fulfilled" }
       ]
     }).populate("userId", "firstName lastName phoneNumber");
   } catch (err) {
