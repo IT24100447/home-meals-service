@@ -99,6 +99,12 @@ const SellerOrders = () => {
                     <Ionicons name="call-outline" size={14} color="#7F8C8D" />
                     <Text style={styles.detailText}>{item.contactNumber}</Text>
                 </View>
+                {item.paymentMethod === 'card' && item.receiptImage && (
+                    <View style={styles.receiptContainer}>
+                        <Text style={styles.receiptLabel}>Payment Receipt</Text>
+                        <Image source={{ uri: item.receiptImage }} style={styles.receiptPreview} />
+                    </View>
+                )}
                 {item.specialInstructions && (
                     <View style={styles.detailItem}>
                         <Ionicons name="chatbox-ellipses-outline" size={14} color="#FF6F00" />
@@ -108,7 +114,26 @@ const SellerOrders = () => {
             </View>
 
             <View style={styles.actionRow}>
-                {item.orderStatus === 'pending' && (
+                {item.orderStatus === 'pending' && item.paymentMethod === 'card' && !item.paymentConfirmed && (
+                    <>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.declineBtn]}
+                            onPress={() => {
+                                setSelectedOrder(item);
+                                setShowCancelModal(true);
+                            }}
+                        >
+                            <Text style={styles.declineBtnText}>Decline</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.confirmPaymentBtn]}
+                            onPress={() => handleStatusUpdate(item._id, 'payment_confirmed')}
+                        >
+                            <Text style={styles.confirmPaymentBtnText}>Confirm Payment</Text>
+                        </TouchableOpacity>
+                    </>
+                )}
+                {item.orderStatus === 'pending' && (item.paymentMethod !== 'card' || item.paymentConfirmed) && (
                     <>
                         <TouchableOpacity
                             style={[styles.actionBtn, styles.declineBtn]}
@@ -171,7 +196,7 @@ const SellerOrders = () => {
                         <View style={styles.emptyContainer}>
                             <Ionicons name="clipboard-outline" size={80} color="#F0F0F0" />
                             <Text style={styles.emptyTitle}>No orders received</Text>
-                            <Text style={styles.emptySubtitle}>When customers order your meals, they'll appear here.</Text>
+                            <Text style={styles.emptySubtitle}>When customers order your meals, they&apos;ll appear here.</Text>
                         </View>
                     }
                 />
@@ -240,12 +265,17 @@ const styles = StyleSheet.create({
     orderDetails: { marginTop: 10, backgroundColor: '#F9FAFB', padding: 12, borderRadius: 15 },
     detailItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
     detailText: { marginLeft: 8, fontSize: 13, color: '#7F8C8D', flex: 1 },
+    receiptContainer: { marginTop: 10 },
+    receiptLabel: { marginBottom: 8, fontSize: 13, color: '#7F8C8D', fontWeight: '600' },
+    receiptPreview: { width: '100%', height: 180, borderRadius: 15, marginTop: 6 },
     actionRow: { flexDirection: 'row', marginTop: 15, justifyContent: 'space-between' },
     actionBtn: { flex: 1, height: 48, borderRadius: 15, justifyContent: 'center', alignItems: 'center' },
     declineBtn: { backgroundColor: '#FEEBEB', marginRight: 10 },
     declineBtnText: { color: '#E74C3C', fontWeight: 'bold' },
     acceptBtn: { backgroundColor: '#30C65A' },
     acceptBtnText: { color: '#FFF', fontWeight: 'bold' },
+    confirmPaymentBtn: { backgroundColor: '#E8F9EE', width: '100%', borderColor: '#8E44AD', borderWidth: 1 },
+    confirmPaymentBtnText: { color: '#8E44AD', fontWeight: 'bold' },
     prepareBtn: { backgroundColor: '#E8F9EE', width: '100%', borderColor: '#30C65A', borderWidth: 1 },
     prepareBtnText: { color: '#30C65A', fontWeight: 'bold' },
     readyBtn: { backgroundColor: '#F5E6FF', width: '100%', borderColor: '#9B59B6', borderWidth: 1 },

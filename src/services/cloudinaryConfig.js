@@ -19,6 +19,7 @@ const storage = new CloudinaryStorage({
         else if (req.originalUrl.includes("meal")) folderName = "meals";
         else if (req.originalUrl.includes("user")) folderName = "profile_pics";
         else if (req.originalUrl.includes("review")) folderName = "reviews";
+        else if (req.originalUrl.includes("orders")) folderName = "order_receipts";
 
         console.log(`Cloudinary Target folder: ${folderName}`);
 

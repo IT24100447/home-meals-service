@@ -40,6 +40,21 @@ const OrderSchema = new mongoose.Schema({
         type: Number
     },
 
+    paymentMethod: {
+        type: String,
+        enum: ["cash", "card"],
+        default: "cash"
+    },
+
+    receiptImage: {
+        type: String
+    },
+
+    paymentConfirmed: {
+        type: Boolean,
+        default: false
+    },
+
     orderStatus: {
         type: String,
         enum: ["pending", "confirmed", "preparing", "ready", "cancelled"],

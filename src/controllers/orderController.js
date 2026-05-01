@@ -3,7 +3,7 @@ import orderService from '../services/orderService.js';
 const placeOrder = async (req, res) => {
     try {
         const userId = req.user.id;
-        const order = await orderService.createOrder(req.body, userId);
+        const order = await orderService.createOrder(req.body, userId, req.file);
         res.status(201).json({ success: true, order, message: "Order placed successfully" });
     } catch (err) {
         console.error(err);

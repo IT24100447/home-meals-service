@@ -2,17 +2,30 @@ import Order from '../models/order.model.js';
 import Alert from '../models/alert.model.js';
 import Meal from '../models/meal.model.js';
 
-const createOrder = async (orderData, userId) => {
-    const { sellerId, items, totalPayment, deliveryAddress, contactNumber, paymentMethod, specialInstructions } = orderData;
-
-    const order = await Order.create({
-        userId,
+const createOrder = async (orderData, userId, file) => {
+    const {
         sellerId,
         items,
         totalPayment,
         deliveryAddress,
         contactNumber,
         paymentMethod,
+        specialInstructions
+    } = orderData;
+
+    const parsedItems = typeof items === 'string' ? JSON.parse(items) : items;
+    const receiptImage = file ? file.path : undefined;
+
+    const order = await Order.create({
+        userId,
+        sellerId,
+        items: parsedItems,
+        totalPayment,
+        deliveryAddress,
+        contactNumber,
+        paymentMethod,
+        receiptImage,
+        paymentConfirmed: paymentMethod === 'cash',
         specialInstructions,
         orderStatus: 'pending'
     });
@@ -43,7 +56,11 @@ const updateOrderStatus = async (orderId, status, cancelReason = null) => {
     const order = await Order.findById(orderId).populate('items.mealId');
     if (!order) throw new Error("Order not found");
 
-    order.orderStatus = status;
+    if (status === 'payment_confirmed') {
+        order.paymentConfirmed = true;
+    } else {
+        order.orderStatus = status;
+    }
     if (cancelReason) order.cancelReason = cancelReason;
     
     await order.save();
@@ -58,6 +75,8 @@ const updateOrderStatus = async (orderId, status, cancelReason = null) => {
     } else if (status === 'ready') {
         const mealName = order.items?.[0]?.mealId?.mealName || "your meal";
         message = `Your order for ${mealName} is ready for pickup!`;
+    } else if (status === 'payment_confirmed') {
+        message = `Your payment has been confirmed and the seller can now accept your order.`;
     }
 
     await Alert.create({

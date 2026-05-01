@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import * as ImagePicker from 'expo-image-picker';
 
 const OrderScreen = () => {
     const router = useRouter();
@@ -16,6 +17,7 @@ const OrderScreen = () => {
     const [contactNumber, setContactNumber] = useState('');
     const [specialInstructions, setSpecialInstructions] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
+    const [receiptImage, setReceiptImage] = useState<string>('');
 
     useEffect(() => {
         const fetchMeal = async () => {
@@ -33,32 +35,66 @@ const OrderScreen = () => {
         fetchMeal();
     }, [id]);
 
+    const pickReceiptImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert("Permission Denied", "We need access to your gallery to upload receipt images.");
+            return;
+        }
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 0.7,
+        });
+
+        if (!result.canceled) {
+            const uri = result.assets?.[0]?.uri;
+            if (uri) setReceiptImage(uri);
+        }
+    };
+
     const handlePlaceOrder = async () => {
         if (!contactNumber) {
             Alert.alert("Error", "Please fill in contact number");
             return;
         }
 
+        if (paymentMethod === 'card' && !receiptImage) {
+            Alert.alert("Error", "Please upload your payment receipt for card payment.");
+            return;
+        }
+
         setSubmitting(true);
         try {
             const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
-            
-            const orderData = {
-                sellerId: meal.sellerId._id,
-                items: [{
-                    mealId: meal._id,
-                    quantity: Number(quantity)
-                }],
-                totalPayment: meal.price * Number(quantity),
-                contactNumber,
-                paymentMethod,
-                specialInstructions
-            };
+            const formData = new FormData();
+
+            formData.append('sellerId', meal.sellerId._id);
+            formData.append('items', JSON.stringify([{
+                mealId: meal._id,
+                quantity: Number(quantity)
+            }]));
+            formData.append('totalPayment', (meal.price * Number(quantity)).toString());
+            formData.append('contactNumber', contactNumber);
+            formData.append('paymentMethod', paymentMethod);
+            formData.append('specialInstructions', specialInstructions);
+
+            if (paymentMethod === 'card' && receiptImage) {
+                const fileName = receiptImage.split('/').pop() || `receipt_${Date.now()}.jpg`;
+                const match = /\.(\w+)$/.exec(fileName);
+                const fileType = match ? `image/${match[1]}` : 'image/jpeg';
+                formData.append('receiptImage', { uri: receiptImage, name: fileName, type: fileType } as any);
+            }
 
             const res = await axios.post(
                 `${process.env.EXPO_PUBLIC_API_URL}/api/v1/orders`,
-                orderData,
-                { headers: { Authorization: `Bearer ${token}` } }
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
             );
 
             if (res.data.success) {
@@ -158,6 +194,18 @@ const OrderScreen = () => {
                                 <Text style={[styles.paymentText, paymentMethod === 'card' && styles.activePaymentText]}>Card Payment</Text>
                             </TouchableOpacity>
                         </View>
+                        {paymentMethod === 'card' && (
+                            <View style={styles.section}>
+                                <Text style={styles.sectionTitle}>Upload Transfer Receipt</Text>
+                                <TouchableOpacity style={styles.uploadContainer} onPress={pickReceiptImage}>
+                                    <Ionicons name="cloud-upload-outline" size={28} color="#30C65A" />
+                                    <Text style={styles.uploadText}>{receiptImage ? 'Receipt selected' : 'Upload payment receipt'}</Text>
+                                </TouchableOpacity>
+                                {receiptImage ? (
+                                    <Image source={{ uri: receiptImage }} style={styles.receiptPreview} />
+                                ) : null}
+                            </View>
+                        )}
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -227,6 +275,26 @@ const styles = StyleSheet.create({
         color: '#1A1C1E',
         height: 100,
         textAlignVertical: 'top',
+    },
+    uploadContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F5F6FA',
+        borderRadius: 15,
+        padding: 15,
+        marginTop: 12,
+    },
+    uploadText: {
+        marginLeft: 12,
+        color: '#30C65A',
+        fontSize: 15,
+        fontWeight: 'bold',
+    },
+    receiptPreview: {
+        width: '100%',
+        height: 180,
+        borderRadius: 15,
+        marginTop: 12,
     },
     paymentOptions: { flexDirection: 'row', justifyContent: 'space-between' },
     paymentOption: {
