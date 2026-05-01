@@ -15,6 +15,7 @@ const AllMealsScreen = () => {
     const [userData, setUserData] = useState<any>(null);
     const [meals, setMeals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [wishlistIds, setWishlistIds] = useState<string[]>([]);
 
     const fetchAllMeals = async () => {
         setLoading(true);
@@ -39,6 +40,21 @@ const AllMealsScreen = () => {
         }
     };
 
+    const fetchWishlist = async () => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            if (!token) return;
+            const res = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/wishlist`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setWishlistIds(res.data.wishlist.map((m: any) => m._id));
+            }
+        } catch (err) {
+            console.error("Error fetching wishlist:", err);
+        }
+    };
+
     useEffect(() => {
         const loadUser = async () => {
             try {
@@ -57,8 +73,39 @@ const AllMealsScreen = () => {
         };
 
         loadUser();
+        loadUser();
         fetchAllMeals();
+        fetchWishlist();
     }, [location]);
+
+    const handleToggleWishlist = async (mealId: string) => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            if (!token) {
+                Alert.alert("Login Required", "Please login to add items to your wishlist.");
+                return;
+            }
+
+            // Optimistic update
+            const isAdding = !wishlistIds.includes(mealId);
+            if (isAdding) {
+                setWishlistIds([...wishlistIds, mealId]);
+            } else {
+                setWishlistIds(wishlistIds.filter(id => id !== mealId));
+            }
+
+            const res = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/wishlist/${mealId}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!res.data.success) {
+                fetchWishlist(); // Rollback
+            }
+        } catch (err) {
+            console.error("Error toggling wishlist:", err);
+            fetchWishlist(); // Rollback
+        }
+    };
 
     const filteredMeals = meals.filter(meal => 
         meal.mealName.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -96,11 +143,15 @@ const AllMealsScreen = () => {
                     renderItem={({ item }) => (
                         <View style={styles.cardWrapper}>
                             <StudentMealCard 
-                                meal={item} 
+                                meal={{
+                                    ...item,
+                                    isWishlisted: wishlistIds.includes(item.id)
+                                }} 
                                 onPress={() => router.push({
                                     pathname: '/MealDetailsScreen' as any,
                                     params: { id: item.id }
                                 })}
+                                onWishlistToggle={() => handleToggleWishlist(item.id)}
                             />
                         </View>
                     )}

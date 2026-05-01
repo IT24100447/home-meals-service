@@ -21,6 +21,7 @@ const MealDetailsScreen = () => {
     const [reviewRating, setReviewRating] = useState(0);
     const [reviewImage, setReviewImage] = useState<string | null>(null);
     const [postingReview, setPostingReview] = useState(false);
+    const [isWishlisted, setIsWishlisted] = useState(false);
 
     useEffect(() => {
         const fetchMealDetails = async () => {
@@ -37,10 +38,51 @@ const MealDetailsScreen = () => {
             }
         };
 
+        const fetchWishlistStatus = async () => {
+            try {
+                const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+                if (!token) return;
+                const res = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/wishlist`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (res.data.success) {
+                    const isFav = res.data.wishlist.some((m: any) => m._id === id);
+                    setIsWishlisted(isFav);
+                }
+            } catch (err) {
+                console.error("Error fetching wishlist status:", err);
+            }
+        };
+
         if (id) {
             fetchMealDetails();
+            fetchWishlistStatus();
         }
     }, [id]);
+
+    const handleToggleWishlist = async () => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            if (!token) {
+                Alert.alert("Login Required", "Please login to add items to your wishlist.");
+                return;
+            }
+
+            // Optimistic update
+            setIsWishlisted(!isWishlisted);
+
+            const res = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/wishlist/${id}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!res.data.success) {
+                setIsWishlisted(isWishlisted); // Rollback
+            }
+        } catch (err) {
+            console.error("Error toggling wishlist:", err);
+            setIsWishlisted(isWishlisted); // Rollback
+        }
+    };
 
     const handleOrder = async () => {
         try {
@@ -172,6 +214,13 @@ const MealDetailsScreen = () => {
                     <Image source={{ uri: meal.image }} style={styles.heroImage} />
                     <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                         <Ionicons name="arrow-back" size={24} color="#FFF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.wishlistBtn} onPress={handleToggleWishlist}>
+                        <Ionicons 
+                            name={isWishlisted ? "heart" : "heart-outline"} 
+                            size={26} 
+                            color={isWishlisted ? "#E74C3C" : "#FFF"} 
+                        />
                     </TouchableOpacity>
                 </View>
 
@@ -420,6 +469,17 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 20,
         left: 20,
+        width: 45,
+        height: 45,
+        borderRadius: 22.5,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    wishlistBtn: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
         width: 45,
         height: 45,
         borderRadius: 22.5,

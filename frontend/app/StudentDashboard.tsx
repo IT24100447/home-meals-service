@@ -21,6 +21,7 @@ const StudentDashboard = () => {
     const [meals, setMeals] = useState<any[]>([]);
     const [sellers, setSellers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [wishlistIds, setWishlistIds] = useState<string[]>([]);
     const [isCustomMode, setIsCustomMode] = useState(false);
     const [customLocationInput, setCustomLocationInput] = useState('');
 
@@ -65,6 +66,21 @@ const StudentDashboard = () => {
         }
     };
 
+    const fetchWishlist = async () => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            if (!token) return;
+            const res = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/wishlist`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setWishlistIds(res.data.wishlist.map((m: any) => m._id));
+            }
+        } catch (err) {
+            console.error("Error fetching wishlist:", err);
+        }
+    };
+
     useEffect(() => {
         const loadUser = async () => {
             try {
@@ -84,7 +100,38 @@ const StudentDashboard = () => {
 
         loadUser();
         fetchData();
+        fetchWishlist();
     }, [location]);
+
+    const handleToggleWishlist = async (mealId: string) => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            if (!token) {
+                Alert.alert("Login Required", "Please login to add items to your wishlist.");
+                return;
+            }
+
+            // Optimistic update
+            const isAdding = !wishlistIds.includes(mealId);
+            if (isAdding) {
+                setWishlistIds([...wishlistIds, mealId]);
+            } else {
+                setWishlistIds(wishlistIds.filter(id => id !== mealId));
+            }
+
+            const res = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/wishlist/${mealId}`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!res.data.success) {
+                // Rollback on failure
+                fetchWishlist();
+            }
+        } catch (err) {
+            console.error("Error toggling wishlist:", err);
+            fetchWishlist(); // Rollback
+        }
+    };
 
     const filteredMeals = meals.filter(meal =>
         meal.mealName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -126,12 +173,17 @@ const StudentDashboard = () => {
                             <Ionicons name="chevron-down" size={16} color="#A0A0A0" />
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity style={styles.profileBtn} onPress={() => setShowProfileMenu(true)}>
-                        <Image
-                            source={{ uri: userData?.profileImage || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60' }}
-                            style={styles.profileImage}
-                        />
-                    </TouchableOpacity>
+                    <View style={styles.headerRight}>
+                        <TouchableOpacity style={styles.wishlistBtn} onPress={() => router.push('/WishlistScreen' as any)}>
+                            <Ionicons name="heart-outline" size={26} color="#1A1C1E" />
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.profileBtn} onPress={() => setShowProfileMenu(true)}>
+                            <Image
+                                source={{ uri: userData?.profileImage || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60' }}
+                                style={styles.profileImage}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Search Bar */}
@@ -168,11 +220,15 @@ const StudentDashboard = () => {
                                 filteredMeals.map(meal => (
                                     <StudentMealCard 
                                         key={meal.id} 
-                                        meal={meal} 
+                                        meal={{
+                                            ...meal,
+                                            isWishlisted: wishlistIds.includes(meal.id)
+                                        }} 
                                         onPress={() => router.push({
                                             pathname: '/MealDetailsScreen' as any,
                                             params: { id: meal.id }
                                         })}
+                                        onWishlistToggle={() => handleToggleWishlist(meal.id)}
                                     />
                                 ))
                             ) : (
@@ -360,6 +416,19 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#1A1C1E',
         marginHorizontal: 5,
+    },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    wishlistBtn: {
+        marginRight: 15,
+        width: 45,
+        height: 45,
+        borderRadius: 22.5,
+        backgroundColor: '#F7F8F9',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     profileBtn: {
         width: 50,

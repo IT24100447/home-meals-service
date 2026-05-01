@@ -11,11 +11,13 @@ interface StudentMealCardProps {
         rating: number;
         sellerName: string;
         sellerImage: string;
+        isWishlisted?: boolean;
     };
     onPress?: () => void;
+    onWishlistToggle?: () => void;
 }
 
-const StudentMealCard = ({ meal, onPress }: StudentMealCardProps) => {
+const StudentMealCard = ({ meal, onPress, onWishlistToggle }: StudentMealCardProps) => {
     return (
         <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
             <View style={styles.imageContainer}>
@@ -24,6 +26,19 @@ const StudentMealCard = ({ meal, onPress }: StudentMealCardProps) => {
                     <Ionicons name="star" size={12} color="#FFD700" />
                     <Text style={styles.ratingText}>{meal.rating}</Text>
                 </View>
+                <TouchableOpacity 
+                    style={styles.wishlistHeart} 
+                    onPress={(e) => {
+                        e.stopPropagation();
+                        onWishlistToggle?.();
+                    }}
+                >
+                    <Ionicons 
+                        name={meal.isWishlisted ? "heart" : "heart-outline"} 
+                        size={20} 
+                        color={meal.isWishlisted ? "#E74C3C" : "#A0A0A0"} 
+                    />
+                </TouchableOpacity>
             </View>
 
             <View style={styles.content}>
@@ -84,6 +99,22 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginLeft: 4,
         color: '#1A1C1E',
+    },
+    wishlistHeart: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     content: {
         padding: 15,
