@@ -94,6 +94,12 @@ const StudentOrders = () => {
                     <Ionicons name="restaurant-outline" size={16} color="#7F8C8D" />
                     <Text style={styles.sellerName}>{item.sellerId?.businessName || 'Unknown Seller'}</Text>
                 </View>
+                {item.orderStatus === 'ready' && item.sellerId?.phoneNumber && (
+                    <View style={styles.contactRow}>
+                        <Ionicons name="call-outline" size={16} color="#9B59B6" />
+                        <Text style={styles.contactText}>{item.sellerId.phoneNumber}</Text>
+                    </View>
+                )}
                 {item.orderStatus === 'cancelled' && item.cancelReason && (
                     <Text style={styles.cancelReason}>Reason: {item.cancelReason}</Text>
                 )}
@@ -165,6 +171,8 @@ const styles = StyleSheet.create({
     orderFooter: { borderTopWidth: 1, borderTopColor: '#F5F6FA', paddingTop: 10, marginTop: 5 },
     sellerRow: { flexDirection: 'row', alignItems: 'center' },
     sellerName: { marginLeft: 5, fontSize: 14, color: '#7F8C8D' },
+    contactRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
+    contactText: { marginLeft: 5, fontSize: 14, color: '#9B59B6', fontWeight: 'bold' },
     cancelReason: { marginTop: 5, fontSize: 12, color: '#E74C3C', fontStyle: 'italic' },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
     emptyTitle: { fontSize: 20, fontWeight: 'bold', color: '#1A1C1E', marginTop: 20 },
