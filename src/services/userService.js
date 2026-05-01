@@ -121,4 +121,28 @@ const updateUserProfile = async (userId, updateData, file) => {
     return user;
 };
 
-export default { createUser, findUserByEmail, loginUser, getAllSellers, getSellerById, updateUserProfile };
+const toggleWishlist = async (userId, mealId) => {
+    const user = await User.findById(userId);
+    if (!user) throw new Error("User not found");
+
+    const index = user.wishlist.indexOf(mealId);
+    if (index === -1) {
+        user.wishlist.push(mealId);
+    } else {
+        user.wishlist.splice(index, 1);
+    }
+
+    await user.save();
+    return user.wishlist;
+};
+
+const getWishlist = async (userId) => {
+    const user = await User.findById(userId).populate({
+        path: 'wishlist',
+        populate: { path: 'sellerId', select: 'businessName firstName lastName profileImage' }
+    });
+    if (!user) throw new Error("User not found");
+    return user.wishlist;
+};
+
+export default { createUser, findUserByEmail, loginUser, getAllSellers, getSellerById, updateUserProfile, toggleWishlist, getWishlist };

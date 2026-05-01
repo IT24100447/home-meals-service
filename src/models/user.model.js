@@ -65,6 +65,13 @@ const UserSchema = new mongoose.Schema({
     businessName: {
         type: String
     },
+
+    wishlist: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Meal"
+        }
+    ],
 }, {
     timestamps: true
 }

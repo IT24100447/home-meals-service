@@ -122,4 +122,29 @@ const updateProfile = async (req, res) => {
     }
 };
 
-export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile, getProfile, updateProfile };
+const toggleWishlist = async (req, res) => {
+    try {
+        const wishlist = await userService.toggleWishlist(req.user.id, req.params.mealId);
+        res.status(200).json({
+            success: true,
+            wishlist,
+            message: "Wishlist updated"
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+const getWishlist = async (req, res) => {
+    try {
+        const wishlist = await userService.getWishlist(req.user.id);
+        res.status(200).json({
+            success: true,
+            wishlist
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile, getProfile, updateProfile, toggleWishlist, getWishlist };
