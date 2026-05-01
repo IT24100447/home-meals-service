@@ -34,7 +34,7 @@ const getOrdersForUser = async (userId, role) => {
     const query = role === 'seller' ? { sellerId: userId } : { userId: userId };
     return await Order.find(query)
         .populate('userId', 'firstName lastName profileImage phoneNumber')
-        .populate('sellerId', 'businessName firstName lastName profileImage')
+        .populate('sellerId', 'businessName firstName lastName profileImage phoneNumber')
         .populate('items.mealId', 'mealName image price')
         .sort({ createdAt: -1 });
 };
