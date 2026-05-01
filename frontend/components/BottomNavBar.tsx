@@ -8,10 +8,10 @@ const BottomNavBar = ({ role = 'seller' }: { role?: 'seller' | 'student' }) => {
     const pathname = usePathname();
 
     const sellerTabs = [
-        { name: 'Dashboard', icon: 'grid-outline', path: '/SellerDashboard' },
+        { name: 'Home', icon: 'grid-outline', path: '/SellerDashboard' },
+        { name: 'Finance', icon: 'wallet-outline', path: '/SellerFinanceScreen' },
         { name: 'Menu', icon: 'fast-food-outline', path: '/SellerMenuScreen' },
         { name: 'Orders', icon: 'clipboard-outline', path: '/SellerOrders' },
-        { name: 'Requests', icon: 'pencil-outline', path: '/SellerRequests' },
         { name: 'Alerts', icon: 'notifications-outline', path: '/SellerAlerts' },
     ];
 
