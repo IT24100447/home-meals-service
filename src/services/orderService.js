@@ -55,6 +55,9 @@ const updateOrderStatus = async (orderId, status, cancelReason = null) => {
     } else if (status === 'confirmed') {
         const mealName = order.items?.[0]?.mealId?.mealName || "your meal";
         message = `Great news! Your order for ${mealName} has been accepted by the seller!`;
+    } else if (status === 'ready') {
+        const mealName = order.items?.[0]?.mealId?.mealName || "your meal";
+        message = `Your order for ${mealName} is ready for pickup!`;
     }
 
     await Alert.create({

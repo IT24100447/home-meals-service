@@ -58,6 +58,7 @@ const SellerOrders = () => {
             case 'pending': return '#F39C12';
             case 'confirmed': return '#30C65A';
             case 'preparing': return '#2980B9';
+            case 'ready': return '#9B59B6';
             case 'cancelled': return '#E74C3C';
             default: return '#7F8C8D';
         }
@@ -132,6 +133,14 @@ const SellerOrders = () => {
                         onPress={() => handleStatusUpdate(item._id, 'preparing')}
                     >
                         <Text style={styles.prepareBtnText}>Start Preparing</Text>
+                    </TouchableOpacity>
+                )}
+                {item.orderStatus === 'preparing' && (
+                    <TouchableOpacity
+                        style={[styles.actionBtn, styles.readyBtn]}
+                        onPress={() => handleStatusUpdate(item._id, 'ready')}
+                    >
+                        <Text style={styles.readyBtnText}>Mark as Ready</Text>
                     </TouchableOpacity>
                 )}
                 {item.orderStatus === 'cancelled' && item.cancelReason && (
@@ -239,6 +248,8 @@ const styles = StyleSheet.create({
     acceptBtnText: { color: '#FFF', fontWeight: 'bold' },
     prepareBtn: { backgroundColor: '#E8F9EE', width: '100%', borderColor: '#30C65A', borderWidth: 1 },
     prepareBtnText: { color: '#30C65A', fontWeight: 'bold' },
+    readyBtn: { backgroundColor: '#F5E6FF', width: '100%', borderColor: '#9B59B6', borderWidth: 1 },
+    readyBtnText: { color: '#9B59B6', fontWeight: 'bold' },
     cancelMsg: { fontSize: 13, color: '#E74C3C', fontStyle: 'italic', flex: 1, textAlign: 'center' },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
     emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#1A1C1E', marginTop: 20 },

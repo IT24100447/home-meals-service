@@ -43,6 +43,7 @@ const StudentOrders = () => {
             case 'pending': return '#F39C12';
             case 'confirmed': return '#30C65A';
             case 'preparing': return '#2980B9';
+            case 'ready': return '#9B59B6';
             case 'cancelled': return '#E74C3C';
             default: return '#7F8C8D';
         }
