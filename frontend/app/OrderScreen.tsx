@@ -14,7 +14,6 @@ const OrderScreen = () => {
 
     // Form states
     const [contactNumber, setContactNumber] = useState('');
-    const [deliveryAddress, setDeliveryAddress] = useState('');
     const [specialInstructions, setSpecialInstructions] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
 
@@ -35,8 +34,8 @@ const OrderScreen = () => {
     }, [id]);
 
     const handlePlaceOrder = async () => {
-        if (!contactNumber || !deliveryAddress) {
-            Alert.alert("Error", "Please fill in contact number and delivery address");
+        if (!contactNumber) {
+            Alert.alert("Error", "Please fill in contact number");
             return;
         }
 
@@ -51,7 +50,6 @@ const OrderScreen = () => {
                     quantity: Number(quantity)
                 }],
                 totalPayment: meal.price * Number(quantity),
-                deliveryAddress,
                 contactNumber,
                 paymentMethod,
                 specialInstructions
@@ -115,7 +113,7 @@ const OrderScreen = () => {
 
                     {/* Contact Info */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Contact & Delivery</Text>
+                        <Text style={styles.sectionTitle}>Contact</Text>
                         <View style={styles.inputContainer}>
                             <Ionicons name="call-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
                             <TextInput 
@@ -124,16 +122,6 @@ const OrderScreen = () => {
                                 value={contactNumber}
                                 onChangeText={setContactNumber}
                                 keyboardType="phone-pad"
-                            />
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="location-outline" size={20} color="#7F8C8D" style={styles.inputIcon} />
-                            <TextInput 
-                                style={styles.input}
-                                placeholder="Delivery Address"
-                                value={deliveryAddress}
-                                onChangeText={setDeliveryAddress}
-                                multiline
                             />
                         </View>
                     </View>
