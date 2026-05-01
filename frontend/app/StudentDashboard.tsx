@@ -9,8 +9,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 import axios from 'axios';
-
-const LOCATIONS = ['Colombo', 'Kandy', 'Galle', 'Negombo', 'Jaffna'];
+import { LOCATIONS } from '../constants/locations';
 
 const StudentDashboard = () => {
     const router = useRouter();
@@ -22,6 +21,8 @@ const StudentDashboard = () => {
     const [meals, setMeals] = useState<any[]>([]);
     const [sellers, setSellers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCustomMode, setIsCustomMode] = useState(false);
+    const [customLocationInput, setCustomLocationInput] = useState('');
 
     const fetchData = async () => {
         setLoading(true);
@@ -206,34 +207,88 @@ const StudentDashboard = () => {
                 )}
             </ScrollView>
 
-            {/* Location Selector Modal */}
             <Modal
                 visible={showLocationModal}
                 transparent={true}
                 animationType="fade"
-                onRequestClose={() => setShowLocationModal(false)}
+                onRequestClose={() => {
+                    setShowLocationModal(false);
+                    setIsCustomMode(false);
+                }}
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Select Location</Text>
-                        {LOCATIONS.map((loc) => (
-                            <TouchableOpacity
-                                key={loc}
-                                style={[styles.locationItem, location === loc && styles.activeLocationItem]}
-                                onPress={() => {
-                                    setLocation(loc);
-                                    setShowLocationModal(false);
-                                }}
-                            >
-                                <Text style={[styles.locationItemText, location === loc && styles.activeLocationItemText]}>
-                                    {loc}
-                                </Text>
-                                {location === loc && <Ionicons name="checkmark-circle" size={20} color="#30C65A" />}
-                            </TouchableOpacity>
-                        ))}
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>
+                                {isCustomMode ? 'Enter Location' : 'Select Location'}
+                            </Text>
+                            {isCustomMode && (
+                                <TouchableOpacity onPress={() => setIsCustomMode(false)}>
+                                    <Ionicons name="arrow-back" size={24} color="#1A1C1E" />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+
+                        {isCustomMode ? (
+                            <View style={styles.customInputContainer}>
+                                <TextInput
+                                    style={styles.modalInput}
+                                    placeholder="Type your area (e.g. Maharagama)"
+                                    value={customLocationInput}
+                                    onChangeText={setCustomLocationInput}
+                                    autoFocus
+                                />
+                                <TouchableOpacity
+                                    style={styles.searchBtn}
+                                    onPress={() => {
+                                        if (customLocationInput.trim()) {
+                                            setLocation(customLocationInput.trim());
+                                            setShowLocationModal(false);
+                                            setIsCustomMode(false);
+                                            setCustomLocationInput('');
+                                        }
+                                    }}
+                                >
+                                    <Text style={styles.searchBtnText}>Search Sellers</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <>
+                                {LOCATIONS.map((loc) => (
+                                    <TouchableOpacity
+                                        key={loc}
+                                        style={[styles.locationItem, location === loc && styles.activeLocationItem]}
+                                        onPress={() => {
+                                            setLocation(loc);
+                                            setShowLocationModal(false);
+                                        }}
+                                    >
+                                        <Text style={[styles.locationItemText, location === loc && styles.activeLocationItemText]}>
+                                            {loc}
+                                        </Text>
+                                        {location === loc && <Ionicons name="checkmark-circle" size={20} color="#30C65A" />}
+                                    </TouchableOpacity>
+                                ))}
+
+                                <TouchableOpacity
+                                    style={styles.otherLocationItem}
+                                    onPress={() => setIsCustomMode(true)}
+                                >
+                                    <View style={styles.otherIconBg}>
+                                        <Ionicons name="pencil-outline" size={18} color="#30C65A" />
+                                    </View>
+                                    <Text style={styles.otherLocationText}>Other (Type Location)</Text>
+                                    <Ionicons name="chevron-forward" size={18} color="#A0A0A0" />
+                                </TouchableOpacity>
+                            </>
+                        )}
+
                         <TouchableOpacity
                             style={styles.closeModalBtn}
-                            onPress={() => setShowLocationModal(false)}
+                            onPress={() => {
+                                setShowLocationModal(false);
+                                setIsCustomMode(false);
+                            }}
                         >
                             <Text style={styles.closeModalBtnText}>Close</Text>
                         </TouchableOpacity>
@@ -462,6 +517,70 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: '#F0F0F0',
         marginVertical: 5,
+    },
+    modalHeader: {
+        flexDirection: 'row-reverse',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 20,
+    },
+    otherLocationItem: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderRadius: 15,
+        backgroundColor: '#F7F8F9',
+        marginTop: 5,
+    },
+    otherIconBg: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: '#E8F9EE',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    otherLocationText: {
+        flex: 1,
+        fontSize: 16,
+        color: '#1A1C1E',
+        fontWeight: '500',
+    },
+    customInputContainer: {
+        width: '100%',
+        alignItems: 'center',
+    },
+    modalInput: {
+        width: '100%',
+        backgroundColor: '#F7F8F9',
+        borderWidth: 1,
+        borderColor: '#F0F0F0',
+        borderRadius: 15,
+        padding: 15,
+        fontSize: 16,
+        color: '#1A1C1E',
+        marginBottom: 20,
+    },
+    searchBtn: {
+        backgroundColor: '#30C65A',
+        width: '100%',
+        padding: 15,
+        borderRadius: 15,
+        alignItems: 'center',
+        shadowColor: '#30C65A',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    searchBtnText: {
+        color: '#FFF',
+        fontWeight: 'bold',
+        fontSize: 16,
     }
 });
 
