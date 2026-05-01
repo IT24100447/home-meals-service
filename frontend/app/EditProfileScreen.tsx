@@ -5,8 +5,7 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-
-const LOCATIONS = ['Colombo', 'Kandy', 'Galle', 'Negombo', 'Jaffna'];
+import { LOCATIONS } from '../constants/locations';
 
 const EditProfileScreen = () => {
     const router = useRouter();
@@ -24,6 +23,7 @@ const EditProfileScreen = () => {
     const [description, setDescription] = useState('');
     const [image, setImage] = useState<string | null>(null);
     const [imageChanged, setImageChanged] = useState(false);
+    const [isOtherSelected, setIsOtherSelected] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -38,7 +38,11 @@ const EditProfileScreen = () => {
                     setFirstName(u.firstName || '');
                     setLastName(u.lastName || '');
                     setPhoneNumber(u.phoneNumber || '');
-                    setCity(u.city || '');
+                    const currentCity = u.city || '';
+                    setCity(currentCity);
+                    if (currentCity && !LOCATIONS.includes(currentCity)) {
+                        setIsOtherSelected(true);
+                    }
                     setAddress(u.address || '');
                     setBusinessName(u.businessName || '');
                     setDescription(u.description || '');
@@ -183,11 +187,37 @@ const EditProfileScreen = () => {
                     <Text style={styles.label}>City</Text>
                     <View style={styles.cityRow}>
                         {LOCATIONS.map(c => (
-                            <TouchableOpacity key={c} style={[styles.cityChip, city === c && styles.activeCityChip]} onPress={() => setCity(c)}>
-                                <Text style={[styles.cityChipText, city === c && styles.activeCityChipText]}>{c}</Text>
+                            <TouchableOpacity 
+                                key={c} 
+                                style={[styles.cityChip, city === c && !isOtherSelected && styles.activeCityChip]} 
+                                onPress={() => {
+                                    setCity(c);
+                                    setIsOtherSelected(false);
+                                }}
+                            >
+                                <Text style={[styles.cityChipText, city === c && !isOtherSelected && styles.activeCityChipText]}>{c}</Text>
                             </TouchableOpacity>
                         ))}
+                        <TouchableOpacity 
+                            style={[styles.cityChip, isOtherSelected && styles.activeCityChip]} 
+                            onPress={() => {
+                                setIsOtherSelected(true);
+                                setCity('');
+                            }}
+                        >
+                            <Text style={[styles.cityChipText, isOtherSelected && styles.activeCityChipText]}>Other</Text>
+                        </TouchableOpacity>
                     </View>
+
+                    {isOtherSelected && (
+                        <TextInput 
+                            style={[styles.input, { marginTop: 10 }]} 
+                            value={city} 
+                            onChangeText={setCity} 
+                            placeholder="Enter your custom city" 
+                            autoFocus
+                        />
+                    )}
 
                     <Text style={styles.label}>Address</Text>
                     <TextInput style={styles.input} value={address} onChangeText={setAddress} placeholder="Street Address" />

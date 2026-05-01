@@ -4,6 +4,7 @@ import axios from "axios";
 import { Link, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { LOCATIONS } from '../constants/locations';
 
 function UserRegisterScreen() {
   const router = useRouter();
@@ -18,6 +19,7 @@ function UserRegisterScreen() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
   const role = 'student';
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -389,18 +391,48 @@ function UserRegisterScreen() {
             {/* ── Current City ── */}
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Current City <Text style={styles.required}>*</Text></Text>
-              <TextInput
-                style={[styles.input, touched.city && city.length > 0 && !isValidCity(city) && styles.inputError]}
-                placeholder="Colombo"
-                value={city}
-                onChangeText={setCity}
-                onBlur={() => markTouched('city')}
-              />
-              {touched.city && city.length === 0 && (
-                <FieldError message="City is required" />
-              )}
-              {touched.city && city.length > 0 && !isValidCity(city) && (
-                <FieldError message="City should contain only letters" />
+              
+              <View style={styles.cityRow}>
+                {LOCATIONS.map((loc) => (
+                  <TouchableOpacity 
+                    key={loc} 
+                    style={[styles.cityChip, city === loc && !isOtherSelected && styles.activeCityChip]} 
+                    onPress={() => {
+                      setCity(loc);
+                      setIsOtherSelected(false);
+                    }}
+                  >
+                    <Text style={[styles.cityChipText, city === loc && !isOtherSelected && styles.activeCityChipText]}>{loc}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity 
+                  style={[styles.cityChip, isOtherSelected && styles.activeCityChip]} 
+                  onPress={() => {
+                    setIsOtherSelected(true);
+                    setCity('');
+                  }}
+                >
+                  <Text style={[styles.cityChipText, isOtherSelected && styles.activeCityChipText]}>Other</Text>
+                </TouchableOpacity>
+              </View>
+
+              {isOtherSelected && (
+                <View style={styles.customCityContainer}>
+                  <TextInput
+                    style={[styles.input, touched.city && city.length > 0 && !isValidCity(city) && styles.inputError]}
+                    placeholder="Enter your city"
+                    value={city}
+                    onChangeText={setCity}
+                    onBlur={() => markTouched('city')}
+                    autoFocus
+                  />
+                  {touched.city && city.length === 0 && (
+                    <FieldError message="City name is required" />
+                  )}
+                  {touched.city && city.length > 0 && !isValidCity(city) && (
+                    <FieldError message="City should contain only letters" />
+                  )}
+                </View>
               )}
             </View>
 
@@ -646,6 +678,37 @@ const styles = StyleSheet.create({
     color: '#30C65A',
     fontSize: 15,
     fontWeight: 'bold',
+  },
+  cityRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 15,
+  },
+  cityChip: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#F8F9FA',
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+  },
+  activeCityChip: {
+    backgroundColor: '#E8F9EE',
+    borderColor: '#30C65A',
+    borderWidth: 1,
+  },
+  cityChipText: {
+    color: '#7F8C8D',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  activeCityChipText: {
+    color: '#30C65A',
+    fontWeight: 'bold',
+  },
+  customCityContainer: {
+    marginTop: 5,
   }
 });
 
