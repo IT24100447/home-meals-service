@@ -35,12 +35,16 @@ const SellerDashboard = () => {
             });
             setReviews(reviewsRes.data);
 
-            // Fetch Special Alerts
-            const alertsRes = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/special-alerts/seller`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (alertsRes.data.success) {
-                setSpecialAlerts(alertsRes.data.alerts);
+            // Fetch Special Alerts (separate try/catch so it doesn't break the dashboard)
+            try {
+                const alertsRes = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/special-alerts/seller`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (alertsRes.data.success) {
+                    setSpecialAlerts(alertsRes.data.alerts);
+                }
+            } catch (alertErr: any) {
+                console.log("Special alerts not available yet:", alertErr.message);
             }
         } catch (err) {
             console.error("Error fetching dashboard data:", err);
