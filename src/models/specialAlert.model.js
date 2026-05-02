@@ -23,9 +23,12 @@ const SpecialAlertSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    image: {
+        type: String
+    },
     offerType: {
         type: String,
-        enum: ["Discount", "Buy 1 Get 1", "Special Offer", "Other"],
+        enum: ["Buy 1 Get 1", "Special Offer", "Other"],
         default: "Special Offer"
     },
     showOnTop: {

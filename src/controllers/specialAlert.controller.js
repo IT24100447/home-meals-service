@@ -4,6 +4,7 @@ export const createSpecialAlert = async (req, res) => {
     try {
         const { mealId, title, description, specialPrice, offerType, showOnTop } = req.body;
         const sellerId = req.user.id;
+        const imageUrl = req.file ? req.file.path : null;
 
         const newAlert = new SpecialAlert({
             sellerId,
@@ -12,7 +13,8 @@ export const createSpecialAlert = async (req, res) => {
             description,
             specialPrice,
             offerType,
-            showOnTop
+            showOnTop,
+            image: imageUrl
         });
 
         await newAlert.save();
@@ -62,7 +64,11 @@ export const getAllSpecialAlerts = async (req, res) => {
 export const updateSpecialAlert = async (req, res) => {
     try {
         const { id } = req.params;
-        const updatedAlert = await SpecialAlert.findByIdAndUpdate(id, req.body, { new: true });
+        const updateData = { ...req.body };
+        if (req.file) {
+            updateData.image = req.file.path;
+        }
+        const updatedAlert = await SpecialAlert.findByIdAndUpdate(id, updateData, { new: true });
         res.status(200).json({ success: true, alert: updatedAlert });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

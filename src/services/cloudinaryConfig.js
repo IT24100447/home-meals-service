@@ -21,6 +21,7 @@ const storage = new CloudinaryStorage({
         else if (req.originalUrl.includes("review")) folderName = "reviews";
         else if (req.originalUrl.includes("finance")) folderName = "bank_slips";
         else if (req.originalUrl.includes("orders")) folderName = "order_receipts";
+        else if (req.originalUrl.includes("special-alert")) folderName = "special_alerts";
 
         console.log(`Cloudinary Target folder: ${folderName}`);
 
