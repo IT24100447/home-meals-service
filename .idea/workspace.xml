@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ba867cdc-280a-4433-9d85-72bfe18544f3" name="Changes" comment="Updated the finance UI to display edit and delete buttons" />
+    <list id="76133b38-6701-43bb-b661-ce0c60351c63" name="Changesss" comment="Changesss">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Finance" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Thumula99&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/IT24100447/home-meals-service.git&quot;,
+    &quot;accountId&quot;: &quot;b97f9faf-f75a-418d-9ba7-861652bbff2d&quot;
+  }
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="3CeY4oHsvmIpd2auMQubmPDqVXB" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Node.js.order.model.js.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Thumula/Desktop/SLLIT/Y2 S2/WMT/Assignment/Home_Meals2",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Users\\Thumula\\Desktop\\SLLIT\\Y2 S2\\WMT\\Assignment\\Home_Meals2\\frontend\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="Home_Meals2" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="Home_Meals2" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-125ca727e0f0-intellij.indexing.shared.core-IU-243.24978.46" />
+        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-IU-243.24978.46" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ba867cdc-280a-4433-9d85-72bfe18544f3" name="Changes" comment="" />
+      <changelist id="76133b38-6701-43bb-b661-ce0c60351c63" name="Changesss" comment="" />
+      <created>1776747314459</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1776747314459</updated>
+      <workItem from="1776747315648" duration="1577000" />
+      <workItem from="1776750531311" duration="82000" />
+      <workItem from="1776849907792" duration="263000" />
+      <workItem from="1776851728933" duration="19000" />
+      <workItem from="1777570467405" duration="2223000" />
+      <workItem from="1777621735710" duration="2618000" />
+      <workItem from="1777626025009" duration="3798000" />
+      <workItem from="1777632688697" duration="8486000" />
+      <workItem from="1777642410769" duration="6751000" />
+      <workItem from="1777653491611" duration="7229000" />
+      <workItem from="1777698916867" duration="2506000" />
+      <workItem from="1777701661535" duration="330000" />
+      <workItem from="1777702004070" duration="2134000" />
+      <workItem from="1777704717479" duration="1770000" />
+      <workItem from="1777706517048" duration="2890000" />
+      <workItem from="1777709994508" duration="195000" />
+      <workItem from="1777710201834" duration="592000" />
+      <workItem from="1777710812301" duration="596000" />
+    </task>
+    <task id="LOCAL-00001" summary="seller login">
+      <option name="closed" value="true" />
+      <created>1777664633690</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1777664633691</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Student order">
+      <option name="closed" value="true" />
+      <created>1777664713909</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1777664713909</updated>
+    </task>
+    <task id="LOCAL-00003" summary="cloudinary">
+      <option name="closed" value="true" />
+      <created>1777664774837</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1777664774837</updated>
+    </task>
+    <task id="LOCAL-00004" summary="index">
+      <option name="closed" value="true" />
+      <created>1777664850348</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1777664850348</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Seller finance">
+      <option name="closed" value="true" />
+      <created>1777664903014</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1777664903014</updated>
+    </task>
+    <task id="LOCAL-00006" summary="finance">
+      <option name="closed" value="true" />
+      <created>1777664949942</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1777664949942</updated>
+    </task>
+    <task id="LOCAL-00007" summary="update server.js">
+      <option name="closed" value="true" />
+      <created>1777664988579</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1777664988579</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Added monthly net profit calulation mechanism to backend and added routes">
+      <option name="closed" value="true" />
+      <created>1777707303114</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1777707303114</updated>
+    </task>
+    <task id="LOCAL-00009" summary="updated the order model and order service">
+      <option name="closed" value="true" />
+      <created>1777707446334</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1777707446334</updated>
+    </task>
+    <task id="LOCAL-00010" summary="updated the Seller finance UI to display new features">
+      <option name="closed" value="true" />
+      <created>1777707507506</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1777707507506</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Reupdated the finance controller for new changes">
+      <option name="closed" value="true" />
+      <created>1777708994542</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1777708994542</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Updated the finance routes accordingly">
+      <option name="closed" value="true" />
+      <created>1777709061015</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1777709061015</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Updated the finance UI to display edit and delete buttons">
+      <option name="closed" value="true" />
+      <created>1777709138417</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1777709138417</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/Finance" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="seller login" />
+    <MESSAGE value="Student order" />
+    <MESSAGE value="cloudinary" />
+    <MESSAGE value="index" />
+    <MESSAGE value="Seller finance" />
+    <MESSAGE value="finance" />
+    <MESSAGE value="update server.js" />
+    <MESSAGE value="Added monthly net profit calulation mechanism to backend and added routes" />
+    <MESSAGE value="updated the order model and order service" />
+    <MESSAGE value="updated the Seller finance UI to display new features" />
+    <MESSAGE value="Reupdated the finance controller for new changes" />
+    <MESSAGE value="Updated the finance routes accordingly" />
+    <MESSAGE value="Added Receipt Uploads&#10;&#10;Improved the Card Payment option by adding a receipt upload and approval system." />
+    <MESSAGE value="stash" />
+    <MESSAGE value="stash2" />
+    <MESSAGE value="Updated the finance UI to display edit and delete buttons" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated the finance UI to display edit and delete buttons" />
+  </component>
+</project>
