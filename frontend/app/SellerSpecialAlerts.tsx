@@ -302,7 +302,7 @@ const SellerSpecialAlerts = () => {
 
                             <Text style={styles.label}>Offer Type</Text>
                             <View style={styles.offerTypes}>
-                                {["Buy 1 Get 1", "Special Offer", "Other"].map(type => (
+                                {["Special Offer", "Other"].map(type => (
                                     <TouchableOpacity 
                                         key={type} 
                                         style={[styles.typeBadge, offerType === type && styles.selectedTypeBadge]}

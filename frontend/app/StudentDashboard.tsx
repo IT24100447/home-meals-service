@@ -42,7 +42,10 @@ const StudentDashboard = () => {
                     image: m.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60',
                     rating: m.averageRating || 0,
                     sellerName: m.sellerId?.businessName || (m.sellerId?.firstName ? `${m.sellerId.firstName} ${m.sellerId.lastName}` : 'Home Cook'),
-                    sellerImage: m.sellerId?.profileImage || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=60'
+                    sellerImage: m.sellerId?.profileImage || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=60',
+                    hasSpecialOffer: m.hasSpecialOffer || false,
+                    specialPrice: m.specialPrice,
+                    offerType: m.offerType
                 }));
                 setMeals(formattedMeals);
             }

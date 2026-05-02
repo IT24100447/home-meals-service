@@ -12,6 +12,9 @@ interface StudentMealCardProps {
         sellerName: string;
         sellerImage: string;
         isWishlisted?: boolean;
+        hasSpecialOffer?: boolean;
+        specialPrice?: number;
+        offerType?: string;
     };
     onPress?: () => void;
     onWishlistToggle?: () => void;
@@ -39,6 +42,12 @@ const StudentMealCard = ({ meal, onPress, onWishlistToggle }: StudentMealCardPro
                         color={meal.isWishlisted ? "#E74C3C" : "#A0A0A0"} 
                     />
                 </TouchableOpacity>
+                {meal.hasSpecialOffer && (
+                    <View style={styles.specialOfferBadge}>
+                        <Ionicons name="pricetag" size={10} color="#FFF" />
+                        <Text style={styles.specialOfferText}>{meal.offerType || 'Special Offer'}</Text>
+                    </View>
+                )}
             </View>
 
             <View style={styles.content}>
@@ -52,7 +61,16 @@ const StudentMealCard = ({ meal, onPress, onWishlistToggle }: StudentMealCardPro
                         />
                         <Text style={styles.sellerName} numberOfLines={1}>{meal.sellerName}</Text>
                     </View>
-                    <Text style={styles.price}>Rs.{meal.price.toFixed(2)}</Text>
+                    <View style={styles.priceContainer}>
+                        {meal.hasSpecialOffer && meal.specialPrice ? (
+                            <>
+                                <Text style={styles.oldPrice}>Rs.{meal.price.toFixed(0)}</Text>
+                                <Text style={styles.price}>Rs.{meal.specialPrice.toFixed(0)}</Text>
+                            </>
+                        ) : (
+                            <Text style={styles.price}>Rs.{meal.price.toFixed(2)}</Text>
+                        )}
+                    </View>
                 </View>
             </View>
         </TouchableOpacity>
@@ -116,6 +134,23 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 2,
     },
+    specialOfferBadge: {
+        position: 'absolute',
+        bottom: 10,
+        left: 10,
+        backgroundColor: '#30C65A',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 20,
+    },
+    specialOfferText: {
+        color: '#FFF',
+        fontSize: 10,
+        fontWeight: 'bold',
+        marginLeft: 4,
+    },
     content: {
         padding: 15,
     },
@@ -145,6 +180,14 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#676767',
         flex: 1,
+    },
+    priceContainer: {
+        alignItems: 'flex-end',
+    },
+    oldPrice: {
+        fontSize: 11,
+        color: '#A0A0A0',
+        textDecorationLine: 'line-through',
     },
     price: {
         fontSize: 16,
