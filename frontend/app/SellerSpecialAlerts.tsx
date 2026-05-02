@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, TextInput, Modal, FlatList, ActivityIndicator, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, TextInput, Modal, FlatList, ActivityIndicator, Alert, Platform, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 
 const SellerSpecialAlerts = () => {
@@ -20,6 +21,7 @@ const SellerSpecialAlerts = () => {
     const [specialPrice, setSpecialPrice] = useState('');
     const [offerType, setOfferType] = useState('Special Offer');
     const [showOnTop, setShowOnTop] = useState(false);
+    const [alertImage, setAlertImage] = useState<string>('');
 
     const fetchAlerts = async () => {
         try {
@@ -58,30 +60,53 @@ const SellerSpecialAlerts = () => {
         load();
     }, []);
 
+    const pickImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert("Permission Denied", "We need gallery access to upload photos.");
+            return;
+        }
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 0.7,
+        });
+        if (!result.canceled) {
+            const uri = result.assets?.[0]?.uri;
+            if (uri) setAlertImage(uri);
+        }
+    };
+
     const handleSave = async () => {
         if (!title || !description || !selectedMeal || !specialPrice) {
-            Alert.alert("Error", "Please fill all fields");
+            Alert.alert("Error", "Please fill all required fields");
             return;
         }
 
         try {
             const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
-            const payload = {
-                title,
-                description,
-                mealId: selectedMeal._id,
-                specialPrice: Number(specialPrice),
-                offerType,
-                showOnTop
-            };
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('mealId', selectedMeal._id);
+            formData.append('specialPrice', specialPrice);
+            formData.append('offerType', offerType);
+            formData.append('showOnTop', showOnTop ? 'true' : 'false');
+
+            if (alertImage) {
+                const fileName = alertImage.split('/').pop() || `alert_${Date.now()}.jpg`;
+                const match = /\.(\w+)$/.exec(fileName);
+                const fileType = match ? `image/${match[1]}` : 'image/jpeg';
+                formData.append('image', { uri: alertImage, name: fileName, type: fileType } as any);
+            }
 
             if (editingAlert) {
-                await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/special-alerts/${editingAlert._id}`, payload, {
-                    headers: { Authorization: `Bearer ${token}` }
+                await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/special-alerts/${editingAlert._id}`, formData, {
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
                 });
             } else {
-                await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/special-alerts`, payload, {
-                    headers: { Authorization: `Bearer ${token}` }
+                await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/special-alerts`, formData, {
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
                 });
             }
 
@@ -123,6 +148,7 @@ const SellerSpecialAlerts = () => {
         setSpecialPrice('');
         setOfferType('Special Offer');
         setShowOnTop(false);
+        setAlertImage('');
         setEditingAlert(null);
     };
 
@@ -134,6 +160,7 @@ const SellerSpecialAlerts = () => {
         setSpecialPrice(alert.specialPrice.toString());
         setOfferType(alert.offerType);
         setShowOnTop(alert.showOnTop);
+        setAlertImage(alert.image || '');
         setShowModal(true);
     };
 
@@ -167,6 +194,9 @@ const SellerSpecialAlerts = () => {
                 ) : (
                     alerts.map(alert => (
                         <View key={alert._id} style={styles.alertCard}>
+                            {(alert.image || alert.mealId?.image) && (
+                                <Image source={{ uri: alert.image || alert.mealId?.image }} style={styles.alertCardImage} />
+                            )}
                             <View style={styles.alertHeader}>
                                 <View style={styles.statusBadge}>
                                     <Text style={styles.statusText}>{alert.offerType}</Text>
@@ -182,7 +212,7 @@ const SellerSpecialAlerts = () => {
                             <View style={styles.mealInfo}>
                                 <Text style={styles.mealName}>Meal: {alert.mealId?.mealName}</Text>
                                 <Text style={styles.priceInfo}>
-                                    Regular: RS.{alert.mealId?.price.toFixed(2)} → <Text style={styles.specialPriceText}>RS.{alert.specialPrice.toFixed(2)}</Text>
+                                    Regular: RS.{alert.mealId?.price?.toFixed(2)} → <Text style={styles.specialPriceText}>RS.{alert.specialPrice?.toFixed(2)}</Text>
                                 </Text>
                             </View>
                             <View style={styles.cardActions}>
@@ -243,6 +273,14 @@ const SellerSpecialAlerts = () => {
                                 ))}
                             </View>
 
+                            {/* Show current price when meal is selected */}
+                            {selectedMeal && (
+                                <View style={styles.currentPriceBox}>
+                                    <Text style={styles.currentPriceLabel}>Current Price</Text>
+                                    <Text style={styles.currentPriceValue}>RS.{selectedMeal.price?.toFixed(2)}</Text>
+                                </View>
+                            )}
+
                             <Text style={styles.label}>Special Price (RS)</Text>
                             <TextInput 
                                 style={styles.input} 
@@ -252,9 +290,19 @@ const SellerSpecialAlerts = () => {
                                 onChangeText={setSpecialPrice}
                             />
 
+                            {/* Savings indicator */}
+                            {selectedMeal && specialPrice ? (
+                                <View style={styles.savingsBox}>
+                                    <Ionicons name="trending-down" size={16} color="#30C65A" />
+                                    <Text style={styles.savingsText}>
+                                        Students save RS.{(selectedMeal.price - Number(specialPrice)).toFixed(2)} ({((1 - Number(specialPrice) / selectedMeal.price) * 100).toFixed(0)}% off)
+                                    </Text>
+                                </View>
+                            ) : null}
+
                             <Text style={styles.label}>Offer Type</Text>
                             <View style={styles.offerTypes}>
-                                {["Discount", "Buy 1 Get 1", "Special Offer", "Other"].map(type => (
+                                {["Buy 1 Get 1", "Special Offer", "Other"].map(type => (
                                     <TouchableOpacity 
                                         key={type} 
                                         style={[styles.typeBadge, offerType === type && styles.selectedTypeBadge]}
@@ -264,6 +312,26 @@ const SellerSpecialAlerts = () => {
                                     </TouchableOpacity>
                                 ))}
                             </View>
+
+                            {/* Image Picker */}
+                            <Text style={styles.label}>Meal Photo (Optional)</Text>
+                            <Text style={styles.photoHint}>Change the photo for this deal, or leave blank to use the meal's original image.</Text>
+                            <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImage}>
+                                {alertImage ? (
+                                    <Image source={{ uri: alertImage }} style={styles.previewImage} />
+                                ) : (
+                                    <View style={styles.imagePickerPlaceholder}>
+                                        <Ionicons name="camera-outline" size={32} color="#30C65A" />
+                                        <Text style={styles.imagePickerText}>Upload Photo</Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                            {alertImage ? (
+                                <TouchableOpacity onPress={() => setAlertImage('')} style={styles.removeImageBtn}>
+                                    <Ionicons name="close-circle" size={16} color="#E74C3C" />
+                                    <Text style={styles.removeImageText}>Remove photo</Text>
+                                </TouchableOpacity>
+                            ) : null}
 
                             <TouchableOpacity 
                                 style={styles.checkboxContainer} 
@@ -317,7 +385,7 @@ const styles = StyleSheet.create({
     alertCard: { 
         backgroundColor: '#FFF', 
         borderRadius: 20, 
-        padding: 15, 
+        overflow: 'hidden',
         marginBottom: 15,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -325,16 +393,20 @@ const styles = StyleSheet.create({
         shadowRadius: 10,
         elevation: 2
     },
-    alertHeader: { flexDirection: 'row', marginBottom: 10 },
+    alertCardImage: {
+        width: '100%',
+        height: 160,
+    },
+    alertHeader: { flexDirection: 'row', marginBottom: 10, paddingHorizontal: 15, paddingTop: 15 },
     statusBadge: { backgroundColor: '#E8F9EE', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 8 },
     statusText: { fontSize: 11, color: '#30C65A', fontWeight: 'bold' },
-    alertTitle: { fontSize: 18, fontWeight: 'bold', color: '#1A1C1E', marginBottom: 5 },
-    alertDesc: { fontSize: 14, color: '#4A4A4A', marginBottom: 12 },
-    mealInfo: { backgroundColor: '#F9FAFB', padding: 10, borderRadius: 12, marginBottom: 15 },
+    alertTitle: { fontSize: 18, fontWeight: 'bold', color: '#1A1C1E', marginBottom: 5, paddingHorizontal: 15 },
+    alertDesc: { fontSize: 14, color: '#4A4A4A', marginBottom: 12, paddingHorizontal: 15 },
+    mealInfo: { backgroundColor: '#F9FAFB', padding: 10, borderRadius: 12, marginBottom: 15, marginHorizontal: 15 },
     mealName: { fontSize: 14, fontWeight: 'bold', color: '#1A1C1E' },
     priceInfo: { fontSize: 12, color: '#7F8C8D', marginTop: 2 },
     specialPriceText: { color: '#30C65A', fontWeight: 'bold', fontSize: 14 },
-    cardActions: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#F0F0F0', paddingTop: 12 },
+    cardActions: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: '#F0F0F0', paddingVertical: 12, marginHorizontal: 15 },
     editBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
     editBtnText: { color: '#30C65A', marginLeft: 8, fontWeight: 'bold' },
     deleteBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
@@ -350,11 +422,55 @@ const styles = StyleSheet.create({
     selectedMealBadge: { backgroundColor: '#30C65A' },
     mealBadgeText: { fontSize: 13, color: '#4A4A4A' },
     selectedMealText: { color: '#FFF', fontWeight: 'bold' },
+    currentPriceBox: {
+        backgroundColor: '#FFF9E6',
+        borderRadius: 12,
+        padding: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: 5,
+        borderWidth: 1,
+        borderColor: '#FFD70030',
+    },
+    currentPriceLabel: { fontSize: 14, color: '#7F8C8D', fontWeight: '500' },
+    currentPriceValue: { fontSize: 18, fontWeight: 'bold', color: '#1A1C1E' },
+    savingsBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#E8F9EE',
+        borderRadius: 10,
+        padding: 10,
+        marginTop: 8,
+    },
+    savingsText: { fontSize: 13, color: '#30C65A', fontWeight: 'bold', marginLeft: 6 },
     offerTypes: { flexDirection: 'row', flexWrap: 'wrap' },
     typeBadge: { borderWidth: 1, borderColor: '#F0F0F0', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, marginRight: 8, marginBottom: 8 },
     selectedTypeBadge: { borderColor: '#30C65A', backgroundColor: '#E8F9EE' },
     typeText: { fontSize: 13, color: '#7F8C8D' },
     selectedTypeText: { color: '#30C65A', fontWeight: 'bold' },
+    photoHint: { fontSize: 12, color: '#A0A0A0', marginBottom: 10 },
+    imagePickerBtn: {
+        borderRadius: 15,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#F0F0F0',
+        borderStyle: 'dashed',
+    },
+    imagePickerPlaceholder: {
+        height: 120,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F9FAFB',
+    },
+    imagePickerText: { marginTop: 8, color: '#30C65A', fontWeight: 'bold', fontSize: 14 },
+    previewImage: { width: '100%', height: 180, borderRadius: 15 },
+    removeImageBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    removeImageText: { color: '#E74C3C', fontSize: 13, marginLeft: 5 },
     checkboxContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 20 },
     checkboxLabel: { marginLeft: 10, fontSize: 14, color: '#4A4A4A' },
     saveBtn: { backgroundColor: '#30C65A', borderRadius: 15, padding: 18, alignItems: 'center', marginTop: 30, marginBottom: 20 },

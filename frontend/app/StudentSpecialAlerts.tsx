@@ -29,17 +29,12 @@ const StudentSpecialAlerts = () => {
     }, [city]);
 
     const handleOrder = (alert: any) => {
-        // Prepare meal object with special price for OrderScreen
-        // Since OrderScreen fetches meal by ID, I should pass the special price in the params or handle it there
-        // Actually, the user said "For the Special Order Use the same one ( order ) i have created"
-        // I will pass the special price in the params and modify OrderScreen to use it if present
-        
         router.push({
             pathname: '/OrderScreen' as any,
             params: { 
                 id: alert.mealId._id, 
                 quantity: 1,
-                specialPrice: alert.specialPrice // Pass special price to OrderScreen
+                specialPrice: alert.specialPrice
             }
         });
     };
@@ -70,43 +65,55 @@ const StudentSpecialAlerts = () => {
                         <Text style={styles.emptySubText}>Check back later for delicious deals!</Text>
                     </View>
                 ) : (
-                    alerts.map(alert => (
-                        <View key={alert._id} style={styles.alertCard}>
-                             <View style={styles.ribbon}>
-                                <Text style={styles.ribbonText}>{alert.offerType}</Text>
-                            </View>
-                            
-                            <View style={styles.alertBody}>
-                                <View style={styles.sellerHeader}>
-                                    <Image 
-                                        source={{ uri: alert.sellerId?.profileImage || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=60' }} 
-                                        style={styles.sellerAvatar} 
-                                    />
-                                    <View>
-                                        <Text style={styles.sellerName}>{alert.sellerId?.businessName || 'Home Cook'}</Text>
-                                        <Text style={styles.cityName}><Ionicons name="location" size={10} /> {alert.sellerId?.city}</Text>
-                                    </View>
+                    alerts.map(alert => {
+                        const mealImage = alert.image || alert.mealId?.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop&q=60';
+                        
+                        return (
+                            <View key={alert._id} style={styles.alertCard}>
+                                {/* Meal Image */}
+                                <Image source={{ uri: mealImage }} style={styles.mealImage} />
+                                
+                                {/* Offer Type Badge */}
+                                <View style={styles.offerBadge}>
+                                    <Text style={styles.offerBadgeText}>{alert.offerType}</Text>
                                 </View>
 
-                                <Text style={styles.alertTitle}>{alert.title}</Text>
-                                <Text style={styles.alertDesc}>{alert.description}</Text>
-
-                                <View style={styles.mealBox}>
-                                    <View style={styles.mealMainInfo}>
-                                        <Text style={styles.mealName}>{alert.mealId?.mealName}</Text>
-                                        <View style={styles.priceRow}>
-                                            <Text style={styles.oldPrice}>RS.{alert.mealId?.price.toFixed(2)}</Text>
-                                            <Text style={styles.newPrice}>RS.{alert.specialPrice.toFixed(2)}</Text>
+                                <View style={styles.alertBody}>
+                                    {/* Seller Info */}
+                                    <View style={styles.sellerHeader}>
+                                        <Image 
+                                            source={{ uri: alert.sellerId?.profileImage || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&auto=format&fit=crop&q=60' }} 
+                                            style={styles.sellerAvatar} 
+                                        />
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.sellerName}>{alert.sellerId?.businessName || 'Home Cook'}</Text>
+                                            <Text style={styles.cityName}>
+                                                <Ionicons name="location" size={10} color="#7F8C8D" /> {alert.sellerId?.city}
+                                            </Text>
                                         </View>
                                     </View>
-                                    <TouchableOpacity style={styles.orderBtn} onPress={() => handleOrder(alert)}>
-                                        <Text style={styles.orderBtnText}>Order Now</Text>
-                                        <Ionicons name="chevron-forward" size={16} color="#FFF" />
-                                    </TouchableOpacity>
+
+                                    {/* Alert Info */}
+                                    <Text style={styles.alertTitle}>{alert.title}</Text>
+                                    <Text style={styles.alertDesc}>{alert.description}</Text>
+
+                                    {/* Meal + Price + Order Button */}
+                                    <View style={styles.bottomSection}>
+                                        <View style={styles.priceSection}>
+                                            <Text style={styles.mealName}>{alert.mealId?.mealName}</Text>
+                                            <View style={styles.priceRow}>
+                                                <Text style={styles.oldPrice}>RS.{alert.mealId?.price?.toFixed(2)}</Text>
+                                                <Text style={styles.newPrice}>RS.{alert.specialPrice?.toFixed(2)}</Text>
+                                            </View>
+                                        </View>
+                                        <TouchableOpacity style={styles.orderBtn} onPress={() => handleOrder(alert)}>
+                                            <Text style={styles.orderBtnText}>Order Now</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
-                        </View>
-                    ))
+                        );
+                    })
                 )}
             </ScrollView>
         </SafeAreaView>
@@ -142,46 +149,47 @@ const styles = StyleSheet.create({
         shadowRadius: 15,
         elevation: 3
     },
-    ribbon: { 
-        backgroundColor: '#30C65A', 
+    mealImage: {
+        width: '100%',
+        height: 180,
+    },
+    offerBadge: { 
         position: 'absolute', 
         top: 15, 
-        right: -30, 
-        width: 120, 
-        transform: [{ rotate: '45deg' }], 
-        alignItems: 'center', 
-        zIndex: 10 
+        left: 15, 
+        backgroundColor: '#30C65A', 
+        paddingHorizontal: 12, 
+        paddingVertical: 5, 
+        borderRadius: 20,
     },
-    ribbonText: { color: '#FFF', fontSize: 10, fontWeight: 'bold', paddingVertical: 2 },
+    offerBadgeText: { color: '#FFF', fontSize: 11, fontWeight: 'bold' },
     alertBody: { padding: 20 },
     sellerHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
     sellerAvatar: { width: 40, height: 40, borderRadius: 20, marginRight: 12 },
     sellerName: { fontSize: 15, fontWeight: 'bold', color: '#1A1C1E' },
-    cityName: { fontSize: 11, color: '#7F8C8D' },
-    alertTitle: { fontSize: 18, fontWeight: 'bold', color: '#30C65A', marginBottom: 8 },
+    cityName: { fontSize: 11, color: '#7F8C8D', marginTop: 2 },
+    alertTitle: { fontSize: 18, fontWeight: 'bold', color: '#1A1C1E', marginBottom: 6 },
     alertDesc: { fontSize: 14, color: '#4A4A4A', marginBottom: 18, lineHeight: 20 },
-    mealBox: { 
-        backgroundColor: '#F8F9FA', 
-        borderRadius: 20, 
-        padding: 15, 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        justifyContent: 'space-between' 
+    bottomSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#F8F9FA',
+        borderRadius: 15,
+        padding: 15,
     },
-    mealMainInfo: { flex: 1 },
-    mealName: { fontSize: 14, fontWeight: 'bold', color: '#1A1C1E' },
-    priceRow: { flexDirection: 'row', alignItems: 'center', marginTop: 5 },
+    priceSection: { flex: 1, marginRight: 12 },
+    mealName: { fontSize: 14, fontWeight: 'bold', color: '#1A1C1E', marginBottom: 4 },
+    priceRow: { flexDirection: 'row', alignItems: 'center' },
     oldPrice: { fontSize: 12, color: '#A0A0A0', textDecorationLine: 'line-through', marginRight: 10 },
-    newPrice: { fontSize: 18, fontWeight: 'bold', color: '#1A1C1E' },
+    newPrice: { fontSize: 18, fontWeight: 'bold', color: '#30C65A' },
     orderBtn: { 
-        backgroundColor: '#1A1C1E', 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        paddingHorizontal: 15, 
-        paddingVertical: 10, 
-        borderRadius: 12 
+        backgroundColor: '#30C65A', 
+        paddingHorizontal: 20, 
+        paddingVertical: 14, 
+        borderRadius: 15,
     },
-    orderBtnText: { color: '#FFF', fontWeight: 'bold', marginRight: 5, fontSize: 14 }
+    orderBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
 });
 
 export default StudentSpecialAlerts;
