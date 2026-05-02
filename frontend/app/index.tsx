@@ -1,50 +1,52 @@
 import { Link } from "expo-router";
-import { Text, View, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, ScrollView, Image, ImageBackground } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function Index() {
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.logoContainer}>
-              <Image source={require('../assets/images/homebites-logo.png')} style={styles.logoImage} />
+    <ImageBackground source={require('../assets/images/background-doodles.png')} style={styles.container} imageStyle={styles.imagePattern} resizeMode="cover">
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <View style={styles.logoContainer}>
+                <Image source={require('../assets/images/homebites-logo.png')} style={styles.logoImage} />
+              </View>
+              <Text style={styles.title}>HomeBites</Text>
+              <Text style={styles.subtitle}>Delicious homemade Meals</Text>
             </View>
-            <Text style={styles.title}>HomeBites</Text>
-            <Text style={styles.subtitle}>Delicious homemade Meals</Text>
+
+            <View style={styles.optionsContainer}>
+              <Text style={styles.selectionTitle}>Select your role</Text>
+
+              <Link href="/StudentLoginScreen" asChild>
+                <TouchableOpacity style={styles.primaryButton}>
+                  <View style={styles.buttonContent}>
+                    <Ionicons name="school-outline" size={24} color="#FFF" />
+                    <Text style={styles.buttonText}>I am a Student</Text>
+                  </View>
+                  <Ionicons name="arrow-forward" size={24} color="#FFF" />
+                </TouchableOpacity>
+              </Link>
+
+              <View style={{ height: 20 }} />
+
+              <Link href="/SellerLoginScreen" asChild>
+                <TouchableOpacity style={styles.primaryButton}>
+                  <View style={styles.buttonContent}>
+                    <Ionicons name="storefront-outline" size={24} color="#FFF" />
+                    <Text style={styles.buttonText}>I am a Seller</Text>
+                  </View>
+                  <Ionicons name="arrow-forward" size={24} color="#FFF" />
+                </TouchableOpacity>
+              </Link>
+            </View>
           </View>
-
-          <View style={styles.optionsContainer}>
-            <Text style={styles.selectionTitle}>Select your role</Text>
-
-            <Link href="/StudentLoginScreen" asChild>
-              <TouchableOpacity style={styles.primaryButton}>
-                <View style={styles.buttonContent}>
-                  <Ionicons name="school-outline" size={24} color="#FFF" />
-                  <Text style={styles.buttonText}>I am a Student</Text>
-                </View>
-                <Ionicons name="arrow-forward" size={24} color="#FFF" />
-              </TouchableOpacity>
-            </Link>
-
-            <View style={{ height: 20 }} />
-
-            <Link href="/SellerLoginScreen" asChild>
-              <TouchableOpacity style={styles.primaryButton}>
-                <View style={styles.buttonContent}>
-                  <Ionicons name="storefront-outline" size={24} color="#FFF" />
-                  <Text style={styles.buttonText}>I am a Seller</Text>
-                </View>
-                <Ionicons name="arrow-forward" size={24} color="#FFF" />
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </View>
-      </ScrollView>
-      <Text style={styles.footerText}>Version 1.0.0</Text>
-    </SafeAreaView>
+        </ScrollView>
+        <Text style={styles.footerText}>Version 1.0.0</Text>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
@@ -52,6 +54,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  safeArea: {
+    flex: 1,
+  },
+  imagePattern: {
+    opacity: 0.32,
   },
   scrollContent: {
     flexGrow: 1,
@@ -71,17 +79,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoImage: {
-    width: 140,
-    height: 140,
+    width: 200,
+    height: 200,
     resizeMode: 'contain',
   },
   title: {
-    fontSize: 34,
-    fontWeight: "bold",
-    color: "#1A1C1E",
-    marginBottom: 10,
+    fontFamily: 'Nunito_800ExtraBold',
+    fontSize: 38,
+    color: "#28b851ff",
+    marginBottom: 5,
   },
   subtitle: {
+    fontFamily: 'Nunito_700Bold',
     fontSize: 16,
     color: "#7F8C8D",
     textAlign: "center",
