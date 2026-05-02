@@ -28,7 +28,7 @@ const SpecialAlertSchema = new mongoose.Schema({
     },
     offerType: {
         type: String,
-        enum: ["Buy 1 Get 1", "Special Offer", "Other"],
+        enum: ["Special Offer", "Other"],
         default: "Special Offer"
     },
     showOnTop: {

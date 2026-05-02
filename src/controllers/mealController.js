@@ -2,6 +2,7 @@ import mealService from "../services/mealService.js";
 import Meal from "../models/meal.model.js";
 import Review from "../models/review.model.js";
 import User from "../models/user.model.js";
+import SpecialAlert from "../models/specialAlert.model.js";
 
 const createMeal = async (req, res) => {
     try {
@@ -57,9 +58,34 @@ const getAllMeals = async (req, res) => {
         // Filter out meals where the seller didn't match the city (if city was provided)
         const finalMeals = city ? meals.filter(meal => meal.sellerId !== null) : meals;
 
+        // Fetch all active special alerts and create a lookup by mealId
+        const activeAlerts = await SpecialAlert.find({ isActive: true });
+        const alertMap = {};
+        activeAlerts.forEach(alert => {
+            alertMap[alert.mealId.toString()] = {
+                specialPrice: alert.specialPrice,
+                offerType: alert.offerType,
+                alertId: alert._id
+            };
+        });
+
+        // Attach special alert info to each meal
+        const mealsWithAlerts = finalMeals.map(meal => {
+            const mealObj = meal.toObject();
+            const alertInfo = alertMap[mealObj._id.toString()];
+            if (alertInfo) {
+                mealObj.hasSpecialOffer = true;
+                mealObj.specialPrice = alertInfo.specialPrice;
+                mealObj.offerType = alertInfo.offerType;
+            } else {
+                mealObj.hasSpecialOffer = false;
+            }
+            return mealObj;
+        });
+
         res.status(200).json({
             success: true,
-            meals: finalMeals
+            meals: mealsWithAlerts
         });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
