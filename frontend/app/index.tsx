@@ -11,7 +11,7 @@ export default function Index() {
           <View style={styles.content}>
             <View style={styles.header}>
               <View style={styles.logoContainer}>
-                <Image source={require('../assets/images/homebites-logo.png')} style={styles.logoImage} />
+                <Image source={require('../assets/images/homebites-logo-transparent.png')} style={styles.logoImage} />
               </View>
               <Text style={styles.title}>HomeBites</Text>
               <Text style={styles.subtitle}>Delicious homemade Meals</Text>
@@ -79,8 +79,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logoImage: {
-    width: 200,
-    height: 200,
+    width: 250,
+    height: 250,
     resizeMode: 'contain',
   },
   title: {
