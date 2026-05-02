@@ -70,7 +70,7 @@ const OrderScreen = () => {
             const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
             const formData = new FormData();
 
-            formData.append('sellerId', meal.sellerId._id);
+            formData.append('sellerId', meal.sellerId._id || meal.sellerId);
             formData.append('items', JSON.stringify([{
                 mealId: meal._id,
                 quantity: Number(quantity)

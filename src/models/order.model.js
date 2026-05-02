@@ -42,8 +42,8 @@ const OrderSchema = new mongoose.Schema({
 
     paymentMethod: {
         type: String,
-        enum: ["cash", "card"],
-        default: "cash"
+        enum: ["cod", "bank_transfer", "cash", "card"],
+        default: "cod"
     },
 
     receiptImage: {
@@ -59,12 +59,6 @@ const OrderSchema = new mongoose.Schema({
         type: String,
         enum: ["pending", "confirmed", "preparing", "ready", "cancelled"],
         default: "pending"
-    },
-
-    paymentMethod: {
-        type: String,
-        enum: ["cod", "bank_transfer", "cash", "card"],
-        default: "cod",
     },
 
     paymentStatus: {
