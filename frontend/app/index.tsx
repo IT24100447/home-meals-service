@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { Text, View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,7 +10,7 @@ export default function Index() {
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={styles.logoContainer}>
-              <Ionicons name="restaurant" size={60} color="#30C65A" />
+              <Image source={require('../assets/images/homebites-logo.png')} style={styles.logoImage} />
             </View>
             <Text style={styles.title}>HomeBites</Text>
             <Text style={styles.subtitle}>Delicious homemade Meals</Text>
@@ -66,18 +66,14 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logoContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: "#F0FFF4",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-    shadowColor: "#30C65A",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
+  },
+  logoImage: {
+    width: 140,
+    height: 140,
+    resizeMode: 'contain',
   },
   title: {
     fontSize: 34,
