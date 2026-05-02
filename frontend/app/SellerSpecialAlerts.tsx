@@ -38,7 +38,7 @@ const SellerSpecialAlerts = () => {
     const fetchMeals = async () => {
         try {
             const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
-            const res = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/seller`, {
+            const res = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/mine`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (res.data.success) {
