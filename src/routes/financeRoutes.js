@@ -23,4 +23,10 @@ router.post('/expenses', authMiddleware, upload.single('bill'), financeControlle
 // 6. Seller gets their expenses
 router.get('/expenses/:sellerId', authMiddleware, financeController.getExpenses);
 
+// 7. Update an expense
+router.patch('/expenses/:id', authMiddleware, upload.single('bill'), financeController.updateExpense);
+
+// 8. Delete an expense
+router.delete('/expenses/:id', authMiddleware, financeController.deleteExpense);
+
 export default router;
