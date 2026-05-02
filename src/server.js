@@ -9,6 +9,7 @@ import alertRoutes from './routes/alertRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import mealRequestRoutes from './routes/mealRequestRoutes.js';
 import financeRoutes from './routes/financeRoutes.js';
+import specialAlertRoutes from './routes/specialAlert.routes.js';
 import { Router } from 'express';
 import CORS from 'cors';
 import express from 'express';
@@ -62,6 +63,7 @@ app.use('/api/v1/alerts', alertRoutes); //Alert Routes
 app.use('/api/v1/reviews', reviewRoutes); //Review Routes
 app.use('/api/v1/meal-requests', mealRequestRoutes); //Meal Request Routes
 app.use('/api/v1/finance', financeRoutes); //Finance Routes
+app.use('/api/v1/special-alerts', specialAlertRoutes); //Special Alert Routes
 
 
 const PORT = process.env.PORT || 3000;
