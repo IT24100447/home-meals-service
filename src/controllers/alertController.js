@@ -22,4 +22,26 @@ const markAsRead = async (req, res) => {
     }
 };
 
-export default { getMyAlerts, markAsRead };
+const deleteAlert = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await Alert.findByIdAndDelete(id);
+        res.status(200).json({ success: true, message: "Alert deleted" });
+    } catch (err) {
+        console.error("Delete Alert Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+const markAllAsRead = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        await Alert.updateMany({ userId, isRead: false }, { isRead: true });
+        res.status(200).json({ success: true, message: "All alerts marked as read" });
+    } catch (err) {
+        console.error("Mark All Read Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { getMyAlerts, markAsRead, deleteAlert, markAllAsRead };
