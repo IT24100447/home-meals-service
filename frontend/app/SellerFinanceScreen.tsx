@@ -18,9 +18,13 @@ const SellerFinanceScreen = () => {
     const [selectedPayment, setSelectedPayment] = useState<any>(null);
     const [showSlipModal, setShowSlipModal] = useState(false);
     const [showExpenseModal, setShowExpenseModal] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
     const [verifying, setVerifying] = useState(false);
     const [generatingReport, setGeneratingReport] = useState(false);
     const [savingExpense, setSavingExpense] = useState(false);
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     // Expense Form State
     const [expenseForm, setExpenseForm] = useState({
@@ -39,18 +43,15 @@ const SellerFinanceScreen = () => {
             const month = now.getMonth() + 1;
             const year = now.getFullYear();
 
-            // Fetch Report Stats (Now includes expenses from backend update)
             const reportRes = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/report/${sellerId}?month=${month}&year=${year}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setReportData(reportRes.data);
 
-            // Fetch Pending Payments
             const paymentsRes = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/seller/payments/${sellerId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPendingPayments(paymentsRes.data.filter((p: any) => p.status === 'pending' && p.paymentMethod === 'bank_transfer'));
-
         } catch (err) {
             console.error("Error fetching finance data:", err);
         } finally {
@@ -65,10 +66,47 @@ const SellerFinanceScreen = () => {
             aspect: [4, 3],
             quality: 1,
         });
-
         if (!result.canceled) {
             setExpenseForm({ ...expenseForm, billImage: result.assets[0] });
         }
+    };
+
+    const handleEditExpense = (expense: any) => {
+        setExpenseForm({
+            category: expense.category,
+            amount: expense.amount.toString(),
+            description: expense.description,
+            billImage: expense.billImageUrl ? { uri: expense.billImageUrl } : null
+        });
+        setEditingId(expense._id);
+        setIsEditing(true);
+        setShowExpenseModal(true);
+    };
+
+    const handleDeleteExpense = async (id: string) => {
+        Alert.alert(
+            "Delete Expense",
+            "Are you sure you want to remove this record?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { 
+                    text: "Delete", 
+                    style: "destructive", 
+                    onPress: async () => {
+                        try {
+                            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+                            await axios.delete(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/expenses/${id}`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
+                            Alert.alert("Success", "Expense deleted");
+                            fetchFinanceData();
+                        } catch (err) {
+                            Alert.alert("Error", "Failed to delete expense");
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const handleSaveExpense = async () => {
@@ -88,38 +126,46 @@ const SellerFinanceScreen = () => {
             formData.append('amount', expenseForm.amount);
             formData.append('description', expenseForm.description);
 
-            if (expenseForm.billImage) {
+            if (expenseForm.billImage && expenseForm.billImage.uri && !expenseForm.billImage.uri.startsWith('http')) {
                 const uri = expenseForm.billImage.uri;
                 const type = 'image/jpeg';
                 const name = 'bill.jpg';
                 formData.append('bill', { uri, type, name } as any);
             }
 
-            await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/expenses`, formData, {
-                headers: { 
-                    'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${token}` 
-                }
-            });
+            if (isEditing && editingId) {
+                await axios.patch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/expenses/${editingId}`, formData, {
+                    headers: { 
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${token}` 
+                    }
+                });
+                Alert.alert("Success", "Expense updated");
+            } else {
+                await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/expenses`, formData, {
+                    headers: { 
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${token}` 
+                    }
+                });
+                Alert.alert("Success", "Expense recorded");
+            }
 
-            Alert.alert("Success", "Expense recorded successfully");
             setShowExpenseModal(false);
             setExpenseForm({ category: 'materials', amount: '', description: '', billImage: null });
+            setIsEditing(false);
+            setEditingId(null);
             fetchFinanceData();
         } catch (err) {
             console.error(err);
-            Alert.alert("Error", "Failed to save expense");
+            Alert.alert("Error", `Failed to ${isEditing ? 'update' : 'save'} expense`);
         } finally {
             setSavingExpense(false);
         }
     };
 
-    const handleDownloadReport = async () => {
-        if (!reportData || reportData.transactions?.length === 0) {
-            Alert.alert("No Data", "There are no verified transactions for this month yet.");
-            return;
-        }
-
+    const handleFinalPDFDownload = async () => {
+        if (!reportData) return;
         setGeneratingReport(true);
         const html = `
             <html>
@@ -227,7 +273,6 @@ const SellerFinanceScreen = () => {
             if (Platform.OS === 'ios' || Platform.OS === 'android') {
                 await Sharing.shareAsync(uri);
             } else {
-                // For web, just print
                 await Print.printAsync({ html });
             }
         } catch (error) {
@@ -235,7 +280,16 @@ const SellerFinanceScreen = () => {
             Alert.alert("Error", "Failed to generate PDF report");
         } finally {
             setGeneratingReport(false);
+            setShowReportModal(false);
         }
+    };
+
+    const handlePreviewReport = async () => {
+        if (!reportData || (reportData.transactions?.length === 0 && reportData.expenses?.length === 0)) {
+            Alert.alert("No Data", "There are no transactions or expenses for this month yet.");
+            return;
+        }
+        setShowReportModal(true);
     };
 
     useEffect(() => {
@@ -304,12 +358,16 @@ const SellerFinanceScreen = () => {
                         </View>
                     </View>
                 </View>
-
                 {/* Action Buttons Row */}
                 <View style={styles.actionGrid}>
                     <TouchableOpacity 
                         style={[styles.actionCard, { backgroundColor: '#30C65A' }]}
-                        onPress={() => setShowExpenseModal(true)}
+                        onPress={() => {
+                            setIsEditing(false);
+                            setEditingId(null);
+                            setExpenseForm({ category: 'materials', amount: '', description: '', billImage: null });
+                            setShowExpenseModal(true);
+                        }}
                     >
                         <Ionicons name="add-circle" size={28} color="#FFF" />
                         <Text style={styles.actionCardText}>Add Expense</Text>
@@ -317,17 +375,11 @@ const SellerFinanceScreen = () => {
 
                     <TouchableOpacity 
                         style={[styles.actionCard, { backgroundColor: '#1A1C1E' }]}
-                        onPress={handleDownloadReport}
+                        onPress={handlePreviewReport}
                         disabled={generatingReport}
                     >
-                        {generatingReport ? (
-                            <ActivityIndicator color="#FFF" />
-                        ) : (
-                            <>
-                                <Ionicons name="document-text" size={28} color="#FFF" />
-                                <Text style={styles.actionCardText}>Get Report</Text>
-                            </>
-                        )}
+                        <Ionicons name="document-text" size={28} color="#FFF" />
+                        <Text style={styles.actionCardText}>Get Report</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -391,15 +443,14 @@ const SellerFinanceScreen = () => {
                     </View>
                 ) : (
                     reportData.expenses.map((expense: any) => (
-                        <TouchableOpacity 
-                            key={expense._id} 
-                            style={styles.expenseCard}
-                            onPress={() => {
-                                setSelectedPayment({ ...expense, isExpense: true }); 
-                                setShowSlipModal(true);
-                            }}
-                        >
-                            <View style={styles.expenseMain}>
+                        <View key={expense._id} style={styles.expenseCard}>
+                            <TouchableOpacity 
+                                style={styles.expenseMain}
+                                onPress={() => {
+                                    setSelectedPayment({ ...expense, isExpense: true }); 
+                                    setShowSlipModal(true);
+                                }}
+                            >
                                 <View style={styles.categoryIconCircle}>
                                     <Ionicons 
                                         name={
@@ -426,18 +477,86 @@ const SellerFinanceScreen = () => {
                                             style={styles.billThumbnail}
                                             resizeMode="cover"
                                         />
-                                        <View style={styles.expandIcon}>
-                                            <Ionicons name="expand" size={10} color="#FFF" />
-                                        </View>
                                     </View>
                                 )}
+                            </TouchableOpacity>
+
+                            <View style={styles.expenseActions}>
+                                <TouchableOpacity 
+                                    style={styles.editActionBtn} 
+                                    onPress={() => handleEditExpense(expense)}
+                                >
+                                    <Ionicons name="pencil" size={20} color="#3498DB" />
+                                </TouchableOpacity>
+                                <TouchableOpacity 
+                                    style={styles.deleteActionBtn} 
+                                    onPress={() => handleDeleteExpense(expense._id)}
+                                >
+                                    <Ionicons name="trash" size={20} color="#E74C3C" />
+                                </TouchableOpacity>
                             </View>
-                        </TouchableOpacity>
+                        </View>
                     ))
                 )}
 
                 <View style={{ height: 100 }} />
             </ScrollView>
+
+            {/* Report Preview Modal */}
+            <Modal visible={showReportModal} transparent={true} animationType="fade">
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { height: 'auto', maxHeight: '80%' }]}>
+                        <View style={styles.modalHeader}>
+                            <View>
+                                <Text style={styles.modalTitle}>Report Preview</Text>
+                                <Text style={styles.modalSubtitle}>Monthly Statement for {reportData?.period}</Text>
+                            </View>
+                            <TouchableOpacity onPress={() => setShowReportModal(false)} style={styles.closeBtn}>
+                                <Ionicons name="close" size={24} color="#1A1C1E" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.previewStatsGrid}>
+                            <View style={styles.previewStatRow}>
+                                <Text style={styles.previewStatLabel}>Total Revenue</Text>
+                                <Text style={styles.previewStatValue}>LKR {reportData?.stats?.totalRevenue?.toLocaleString()}</Text>
+                            </View>
+                            <View style={styles.previewStatRow}>
+                                <Text style={styles.previewStatLabel}>Platform Fee (10%)</Text>
+                                <Text style={[styles.previewStatValue, { color: '#E74C3C' }]}>- LKR {reportData?.stats?.totalCommission?.toLocaleString()}</Text>
+                            </View>
+                            <View style={styles.previewStatRow}>
+                                <Text style={styles.previewStatLabel}>Total Expenses</Text>
+                                <Text style={[styles.previewStatValue, { color: '#E67E22' }]}>- LKR {reportData?.stats?.totalExpenses?.toLocaleString()}</Text>
+                            </View>
+                            <View style={styles.divider} />
+                            <View style={styles.previewStatRow}>
+                                <Text style={[styles.previewStatLabel, { fontWeight: '900', color: '#1A1C1E' }]}>Net Profit</Text>
+                                <Text style={[styles.previewStatValue, { fontWeight: '900', color: '#30C65A' }]}>LKR {reportData?.stats?.netProfit?.toLocaleString()}</Text>
+                            </View>
+                        </View>
+
+                        <Text style={styles.previewNotice}>
+                            The PDF report will include a full breakdown of all {reportData?.transactions?.length} orders and {reportData?.expenses?.length} expenditure records.
+                        </Text>
+
+                        <TouchableOpacity 
+                            style={styles.saveBtn}
+                            onPress={handleFinalPDFDownload}
+                            disabled={generatingReport}
+                        >
+                            {generatingReport ? (
+                                <ActivityIndicator color="#FFF" />
+                            ) : (
+                                <>
+                                    <Ionicons name="cloud-download" size={22} color="#FFF" style={{ marginRight: 10 }} />
+                                    <Text style={styles.saveBtnText}>Download Official PDF</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
 
             {/* Expense Modal */}
             <Modal visible={showExpenseModal} transparent={true} animationType="slide">
@@ -445,7 +564,7 @@ const SellerFinanceScreen = () => {
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
                             <View>
-                                <Text style={styles.modalTitle}>Record Expense</Text>
+                                <Text style={styles.modalTitle}>{isEditing ? 'Edit Expense' : 'Record Expense'}</Text>
                                 <Text style={styles.modalSubtitle}>Materials, packaging, transport, etc.</Text>
                             </View>
                             <TouchableOpacity onPress={() => setShowExpenseModal(false)} style={styles.closeBtn}>
@@ -503,7 +622,11 @@ const SellerFinanceScreen = () => {
                                 onPress={handleSaveExpense}
                                 disabled={savingExpense}
                             >
-                                {savingExpense ? <ActivityIndicator color="#FFF" /> : <Text style={styles.saveBtnText}>Save Expense</Text>}
+                                {savingExpense ? (
+                                    <ActivityIndicator color="#FFF" />
+                                ) : (
+                                    <Text style={styles.saveBtnText}>{isEditing ? 'Update Expense' : 'Save Expense'}</Text>
+                                )}
                             </TouchableOpacity>
                         </ScrollView>
                     </View>
@@ -676,7 +799,6 @@ const styles = StyleSheet.create({
     btnVerify: { backgroundColor: '#30C65A' },
     btnText: { fontSize: 17, fontWeight: 'bold' },
 
-    // Expense Card Styles
     expenseCard: {
         backgroundColor: '#FFF',
         borderRadius: 20,
@@ -684,8 +806,11 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderWidth: 1,
         borderColor: '#F0F0F0',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
     },
-    expenseMain: { flexDirection: 'row', alignItems: 'center' },
+    expenseMain: { flex: 1, flexDirection: 'row', alignItems: 'center' },
     categoryIconCircle: { 
         width: 45, 
         height: 45, 
@@ -703,9 +828,30 @@ const styles = StyleSheet.create({
     expenseAmountTextSmall: { fontSize: 16, fontWeight: 'bold', color: '#E67E22', marginTop: 5 },
     hasBill: { flexDirection: 'row', alignItems: 'center', marginTop: 5 },
     hasBillText: { fontSize: 10, color: '#E67E22', fontWeight: '700', marginLeft: 3, textTransform: 'uppercase' },
-    thumbnailContainer: { width: 60, height: 60, borderRadius: 12, overflow: 'hidden', backgroundColor: '#F0F0F0', position: 'relative' },
+    thumbnailContainer: { width: 60, height: 60, borderRadius: 12, overflow: 'hidden', backgroundColor: '#F0F0F0', position: 'relative', marginLeft: 10 },
     billThumbnail: { width: '100%', height: '100%' },
-    expandIcon: { position: 'absolute', bottom: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 4, padding: 2 }
+    expandIcon: { position: 'absolute', bottom: 4, right: 4, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 4, padding: 2 },
+    
+    // Expense Actions
+    expenseActions: { 
+        flexDirection: 'column', 
+        gap: 15, 
+        marginLeft: 15, 
+        borderLeftWidth: 1, 
+        borderLeftColor: '#EEE', 
+        paddingLeft: 15,
+        justifyContent: 'center',
+        minWidth: 55
+    },
+    editActionBtn: { padding: 10, backgroundColor: '#E1F5FE', borderRadius: 12 },
+    deleteActionBtn: { padding: 10, backgroundColor: '#FFEBEE', borderRadius: 12 },
+
+    // Preview Modal Styles
+    previewStatsGrid: { backgroundColor: '#F8F9FA', borderRadius: 20, padding: 20, marginVertical: 20, borderWidth: 1, borderColor: '#EEE' },
+    previewStatRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
+    previewStatLabel: { fontSize: 14, color: '#7F8C8D', fontWeight: '600' },
+    previewStatValue: { fontSize: 16, fontWeight: 'bold', color: '#1A1C1E' },
+    previewNotice: { fontSize: 13, color: '#A0A0A0', textAlign: 'center', marginBottom: 25, lineHeight: 18, paddingHorizontal: 10 }
 });
 
 export default SellerFinanceScreen;
