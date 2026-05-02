@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableOpacity, Image, Modal, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TextInput, TouchableOpacity, Image, Modal, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import BottomNavBar from '../components/BottomNavBar';
@@ -55,7 +55,7 @@ const StudentDashboard = () => {
                     description: s.description || 'Verified Home Cook',
                     image: s.profileImage || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60',
                     phoneNumber: s.phoneNumber,
-                    rating: s.averageRating || 4.8 
+                    rating: s.averageRating || 4.8
                 }));
                 setSellers(formattedSellers);
             }
@@ -204,6 +204,26 @@ const StudentDashboard = () => {
                     </View>
                 ) : (
                     <>
+                        {/* Special Meal Alerts Button */}
+                        <TouchableOpacity 
+                            style={styles.specialAlertsBtn}
+                            onPress={() => router.push({
+                                pathname: '/StudentSpecialAlerts' as any,
+                                params: { city: location }
+                            })}
+                        >
+                            <View style={styles.specialAlertsContent}>
+                                <View style={styles.specialAlertsIconBg}>
+                                    <Ionicons name="notifications" size={24} color="#FFF" />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.specialAlertsTitle}>Special Meal Alerts</Text>
+                                    <Text style={styles.specialAlertsSub}>Exclusive discounts for students in {location}</Text>
+                                </View>
+                                <Ionicons name="chevron-forward" size={20} color="#30C65A" />
+                            </View>
+                        </TouchableOpacity>
+
                         {/* Meals Section */}
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionTitle}>Meals Around You</Text>
@@ -218,12 +238,12 @@ const StudentDashboard = () => {
                         >
                             {filteredMeals.length > 0 ? (
                                 filteredMeals.map(meal => (
-                                    <StudentMealCard 
-                                        key={meal.id} 
+                                    <StudentMealCard
+                                        key={meal.id}
                                         meal={{
                                             ...meal,
                                             isWishlisted: wishlistIds.includes(meal.id)
-                                        }} 
+                                        }}
                                         onPress={() => router.push({
                                             pathname: '/MealDetailsScreen' as any,
                                             params: { id: meal.id }
@@ -246,9 +266,9 @@ const StudentDashboard = () => {
                         <View style={styles.sellersList}>
                             {filteredSellers.length > 0 ? (
                                 filteredSellers.map(seller => (
-                                    <SellerCard 
-                                        key={seller.id} 
-                                        seller={seller} 
+                                    <SellerCard
+                                        key={seller.id}
+                                        seller={seller}
                                         onPress={() => router.push({
                                             pathname: '/SellerDetailsScreen' as any,
                                             params: { id: seller.id }
@@ -361,16 +381,16 @@ const StudentDashboard = () => {
                             <Text style={styles.menuItemText}>Edit Profile</Text>
                         </TouchableOpacity>
                         <View style={styles.menuDivider} />
-                        <TouchableOpacity style={styles.menuItem} onPress={() => { 
-                            setShowProfileMenu(false); 
+                        <TouchableOpacity style={styles.menuItem} onPress={() => {
+                            setShowProfileMenu(false);
                             if (Platform.OS === 'web') {
                                 localStorage.removeItem('userToken');
                                 localStorage.removeItem('userData');
                             } else {
-                                SecureStore.deleteItemAsync('userToken'); 
-                                SecureStore.deleteItemAsync('userData'); 
+                                SecureStore.deleteItemAsync('userToken');
+                                SecureStore.deleteItemAsync('userData');
                             }
-                            router.replace('/'); 
+                            router.replace('/');
                         }}>
                             <Ionicons name="log-out-outline" size={20} color="#E74C3C" />
                             <Text style={[styles.menuItemText, { color: '#E74C3C' }]}>Sign Out</Text>
@@ -650,7 +670,44 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontWeight: 'bold',
         fontSize: 16,
-    }
+    },
+    specialAlertsBtn: {
+        backgroundColor: '#FFF',
+        marginHorizontal: 20,
+        borderRadius: 20,
+        marginBottom: 25,
+        borderWidth: 1,
+        borderColor: '#E8F9EE',
+        shadowColor: '#30C65A',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    specialAlertsContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+    },
+    specialAlertsIconBg: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#30C65A',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
+    },
+    specialAlertsTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#1A1C1E',
+    },
+    specialAlertsSub: {
+        fontSize: 12,
+        color: '#7F8C8D',
+        marginTop: 2,
+    },
 });
 
 export default StudentDashboard;

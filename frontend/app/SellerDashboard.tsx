@@ -10,6 +10,7 @@ const SellerDashboard = () => {
     const router = useRouter();
     const [sellerData, setSellerData] = useState<any>(null);
     const [reviews, setReviews] = useState<any[]>([]);
+    const [specialAlerts, setSpecialAlerts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -32,8 +33,15 @@ const SellerDashboard = () => {
             const reviewsRes = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/reviews/seller/${sellerId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
             setReviews(reviewsRes.data);
+
+            // Fetch Special Alerts
+            const alertsRes = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/special-alerts/seller`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (alertsRes.data.success) {
+                setSpecialAlerts(alertsRes.data.alerts);
+            }
         } catch (err) {
             console.error("Error fetching dashboard data:", err);
         } finally {
@@ -126,8 +134,43 @@ const SellerDashboard = () => {
                 </View>
 
                 <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Promotions & Alerts</Text>
+                    <TouchableOpacity onPress={() => router.push('/SellerSpecialAlerts' as any)}>
+                        <Text style={styles.manageText}>Manage</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {specialAlerts.length === 0 ? (
+                    <View style={styles.emptyAlertsBox}>
+                        <Text style={styles.emptyAlertsText}>No active special alerts.</Text>
+                    </View>
+                ) : (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.alertsScroll}>
+                        {specialAlerts.map(alert => (
+                            <View key={alert._id} style={styles.dashboardAlertCard}>
+                                <Text style={styles.dashAlertTitle}>{alert.title}</Text>
+                                <Text style={styles.dashAlertBadge}>{alert.offerType}</Text>
+                                <Text style={styles.dashAlertPrice}>RS.{alert.specialPrice}</Text>
+                            </View>
+                        ))}
+                    </ScrollView>
+                )}
+
+                <View style={[styles.sectionHeader, { marginTop: 30 }]}>
                     <Text style={styles.sectionTitle}>Recent Reviews</Text>
                 </View>
+
+                {/* Special Highlight on top of reviews if any alert has showOnTop: true */}
+                {specialAlerts.find(a => a.showOnTop) && (
+                    <View style={styles.featuredAlertContainer}>
+                         <View style={styles.featuredBadge}>
+                            <Ionicons name="megaphone" size={14} color="#FFF" />
+                            <Text style={styles.featuredText}>TOP PROMOTION</Text>
+                         </View>
+                         <Text style={styles.featuredTitle}>{specialAlerts.find(a => a.showOnTop)?.title}</Text>
+                         <Text style={styles.featuredDesc}>{specialAlerts.find(a => a.showOnTop)?.description}</Text>
+                    </View>
+                )}
 
                 {reviews.length === 0 ? (
                     <View style={styles.emptyReviews}>
@@ -294,7 +337,48 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: '#F0F0F0',
         marginVertical: 5,
-    }
+    },
+    manageText: { color: '#30C65A', fontWeight: 'bold' },
+    emptyAlertsBox: { marginHorizontal: 25, padding: 15, borderRadius: 15, backgroundColor: '#F0F0F0', alignItems: 'center' },
+    emptyAlertsText: { color: '#7F8C8D', fontSize: 13 },
+    alertsScroll: { paddingLeft: 25, marginTop: 10 },
+    dashboardAlertCard: { 
+        backgroundColor: '#E8F9EE', 
+        padding: 15, 
+        borderRadius: 15, 
+        width: 150, 
+        marginRight: 12,
+        borderWidth: 1,
+        borderColor: '#30C65A50'
+    },
+    dashAlertTitle: { fontSize: 14, fontWeight: 'bold', color: '#1A1C1E', marginBottom: 5 },
+    dashAlertBadge: { fontSize: 10, color: '#30C65A', fontWeight: 'bold', textTransform: 'uppercase' },
+    dashAlertPrice: { fontSize: 16, fontWeight: 'bold', color: '#30C65A', marginTop: 8 },
+    featuredAlertContainer: {
+        marginHorizontal: 25,
+        backgroundColor: '#1A1C1E',
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5
+    },
+    featuredBadge: { 
+        flexDirection: 'row', 
+        alignItems: 'center', 
+        backgroundColor: '#30C65A', 
+        alignSelf: 'flex-start', 
+        paddingHorizontal: 10, 
+        paddingVertical: 5, 
+        borderRadius: 20,
+        marginBottom: 10
+    },
+    featuredText: { color: '#FFF', fontSize: 10, fontWeight: 'bold', marginLeft: 5 },
+    featuredTitle: { color: '#FFF', fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
+    featuredDesc: { color: '#CDCDCD', fontSize: 13, lineHeight: 18 }
 });
 
 export default SellerDashboard;

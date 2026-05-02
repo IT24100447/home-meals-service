@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 const OrderScreen = () => {
     const router = useRouter();
-    const { id, quantity } = useLocalSearchParams();
+    const { id, quantity, specialPrice } = useLocalSearchParams();
     const [meal, setMeal] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -75,7 +75,9 @@ const OrderScreen = () => {
                 mealId: meal._id,
                 quantity: Number(quantity)
             }]));
-            formData.append('totalPayment', (meal.price * Number(quantity)).toString());
+            
+            const finalPrice = specialPrice ? Number(specialPrice) : meal.price;
+            formData.append('totalPayment', (finalPrice * Number(quantity)).toString());
             formData.append('contactNumber', contactNumber);
             formData.append('paymentMethod', paymentMethod);
             formData.append('specialInstructions', specialInstructions || "");
@@ -142,8 +144,8 @@ const OrderScreen = () => {
                                 <Text style={styles.mealName}>{meal.mealName}</Text>
                                 <Text style={styles.sellerName}>by {meal.sellerId.businessName}</Text>
                                 <View style={styles.priceRow}>
-                                    <Text style={styles.qtyLabel}>{quantity} x RS.{meal.price.toFixed(2)}</Text>
-                                    <Text style={styles.totalLabel}>RS.{(meal.price * Number(quantity)).toFixed(2)}</Text>
+                                    <Text style={styles.qtyLabel}>{quantity} x RS.{(specialPrice ? Number(specialPrice) : meal.price).toFixed(2)}</Text>
+                                    <Text style={styles.totalLabel}>RS.{((specialPrice ? Number(specialPrice) : meal.price) * Number(quantity)).toFixed(2)}</Text>
                                 </View>
                             </View>
                         </View>
@@ -215,7 +217,7 @@ const OrderScreen = () => {
             <View style={styles.footer}>
                 <View style={styles.totalContainer}>
                     <Text style={styles.totalText}>Total Payment</Text>
-                    <Text style={styles.totalAmount}>RS.{(meal.price * Number(quantity)).toFixed(2)}</Text>
+                    <Text style={styles.totalAmount}>RS.{((specialPrice ? Number(specialPrice) : meal.price) * Number(quantity)).toFixed(2)}</Text>
                 </View>
                 <TouchableOpacity 
                     style={[styles.confirmBtn, submitting && styles.disabledBtn]} 
