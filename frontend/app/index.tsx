@@ -1,5 +1,6 @@
 import { Link } from "expo-router";
-import { Text, View, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView } from "react-native";
+import { Text, View, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function Index() {

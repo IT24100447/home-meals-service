@@ -63,8 +63,8 @@ const OrderSchema = new mongoose.Schema({
 
     paymentMethod: {
         type: String,
-        enum: ["cash", "card"],
-        default: "cash",
+        enum: ["cod", "bank_transfer", "cash", "card"],
+        default: "cod",
     },
 
     paymentStatus: {
@@ -76,6 +76,16 @@ const OrderSchema = new mongoose.Schema({
     specialInstructions: { type: String },
 
     cancelReason: { type: String },
+
+    platformFee: {
+        type: Number,
+        default: 0
+    },
+
+    sellerEarnings: {
+        type: Number,
+        default: 0
+    },
 }, {
     timestamps: true
 });

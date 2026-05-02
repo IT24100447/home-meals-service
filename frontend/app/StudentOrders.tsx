@@ -6,11 +6,14 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import BottomNavBar from '../components/BottomNavBar';
 
+import * as ImagePicker from 'expo-image-picker';
+
 const StudentOrders = () => {
     const router = useRouter();
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     const fetchOrders = async () => {
         try {
@@ -29,6 +32,61 @@ const StudentOrders = () => {
         }
     };
 
+    const handleUploadSlip = async (order: any) => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (permissionResult.granted === false) {
+            alert("Permission to access camera roll is required!");
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 0.5,
+        });
+
+        if (!result.canceled) {
+            setUploading(true);
+            try {
+                const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+                const studentId = Platform.OS === 'web' ? localStorage.getItem('userId') : await SecureStore.getItemAsync('userId');
+
+                const formData = new FormData();
+                formData.append('orderId', order._id);
+                formData.append('studentId', studentId as string);
+                formData.append('sellerId', order.sellerId._id);
+                formData.append('amount', order.totalPayment.toString());
+
+                // Handle file object based on platform
+                const uri = result.assets[0].uri;
+                const fileName = uri.split('/').pop();
+                const fileType = fileName?.split('.').pop();
+
+                formData.append('bankSlip', {
+                    uri,
+                    name: fileName,
+                    type: `image/${fileType}`,
+                } as any);
+
+                await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/upload-slip`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                alert("Success: Bank slip uploaded for verification!");
+                fetchOrders();
+            } catch (err) {
+                console.error("Upload error:", err);
+                alert("Failed to upload slip. Please try again.");
+            } finally {
+                setUploading(false);
+            }
+        }
+    };
+
     useEffect(() => {
         fetchOrders();
     }, []);
@@ -43,7 +101,6 @@ const StudentOrders = () => {
             case 'pending': return '#F39C12';
             case 'confirmed': return '#30C65A';
             case 'preparing': return '#2980B9';
-            case 'ready': return '#9B59B6';
             case 'cancelled': return '#E74C3C';
             default: return '#7F8C8D';
         }
@@ -52,7 +109,12 @@ const StudentOrders = () => {
     const renderOrderItem = ({ item }: { item: any }) => (
         <View style={styles.orderCard}>
             <View style={styles.orderHeader}>
-                <Text style={styles.orderDate}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                <View>
+                    <Text style={styles.orderDate}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                    <Text style={styles.paymentMethodText}>
+                        Method: {item.paymentMethod === 'bank_transfer' ? '🏦 Bank Transfer' : '💵 Cash on Delivery'}
+                    </Text>
+                </View>
                 <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.orderStatus) + '20' }]}>
                     <Text style={[styles.statusText, { color: getStatusColor(item.orderStatus) }]}>
                         {item.orderStatus.toUpperCase()}
@@ -90,9 +152,30 @@ const StudentOrders = () => {
             ))}
 
             <View style={styles.orderFooter}>
-                <View style={styles.sellerRow}>
-                    <Ionicons name="restaurant-outline" size={16} color="#7F8C8D" />
-                    <Text style={styles.sellerName}>{item.sellerId?.businessName || 'Unknown Seller'}</Text>
+                <View style={styles.footerRow}>
+                    <View style={styles.sellerRow}>
+                        <Ionicons name="restaurant-outline" size={16} color="#7F8C8D" />
+                        <Text style={styles.sellerName}>{item.sellerId?.businessName || 'Unknown Seller'}</Text>
+                    </View>
+
+                    {/* BANK SLIP UPLOAD BUTTON */}
+                    {item.paymentMethod === 'bank_transfer' && item.paymentStatus === 'pending' && (
+                        <TouchableOpacity
+                            style={styles.uploadBtn}
+                            onPress={() => handleUploadSlip(item)}
+                            disabled={uploading}
+                        >
+                            <Ionicons name="cloud-upload" size={16} color="#FFF" />
+                            <Text style={styles.uploadBtnText}>Upload Slip</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {item.paymentMethod === 'bank_transfer' && item.paymentStatus === 'paid' && (
+                        <View style={styles.paidBadge}>
+                            <Ionicons name="checkmark-circle" size={14} color="#30C65A" />
+                            <Text style={styles.paidBadgeText}>Payment Verified</Text>
+                        </View>
+                    )}
                 </View>
                 {item.orderStatus === 'ready' && item.sellerId?.phoneNumber && (
                     <View style={styles.contactRow}>
@@ -100,6 +183,7 @@ const StudentOrders = () => {
                         <Text style={styles.contactText}>{item.sellerId.phoneNumber}</Text>
                     </View>
                 )}
+
                 {item.orderStatus === 'cancelled' && item.cancelReason && (
                     <Text style={styles.cancelReason}>Reason: {item.cancelReason}</Text>
                 )}
@@ -173,6 +257,26 @@ const styles = StyleSheet.create({
     sellerName: { marginLeft: 5, fontSize: 14, color: '#7F8C8D' },
     contactRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
     contactText: { marginLeft: 5, fontSize: 14, color: '#9B59B6', fontWeight: 'bold' },
+    uploadBtn: {
+        backgroundColor: '#30C65A',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 10,
+        gap: 5
+    },
+    uploadBtnText: { color: '#FFF', fontSize: 12, fontWeight: 'bold' },
+    paidBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#E8F9EE',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 8,
+        gap: 4
+    },
+    paidBadgeText: { color: '#30C65A', fontSize: 11, fontWeight: 'bold' },
     cancelReason: { marginTop: 5, fontSize: 12, color: '#E74C3C', fontStyle: 'italic' },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
     emptyTitle: { fontSize: 20, fontWeight: 'bold', color: '#1A1C1E', marginTop: 20 },
