@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ba867cdc-280a-4433-9d85-72bfe18544f3" name="Changes" comment="Updated the finance UI to display edit and delete buttons" />
-    <list id="76133b38-6701-43bb-b661-ce0c60351c63" name="Changesss" comment="Changesss">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="ba867cdc-280a-4433-9d85-72bfe18544f3" name="Changes" comment="stash file">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/OrderScreen.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/OrderScreen.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/app/StudentOrders.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/app/StudentOrders.tsx" afterDir="false" />
     </list>
+    <list id="76133b38-6701-43bb-b661-ce0c60351c63" name="Changesss" comment="Changesss" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -16,7 +18,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Finance" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -50,6 +52,7 @@
     "Node.js.order.model.js.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/Thumula/Desktop/SLLIT/Y2 S2/WMT/Assignment/Home_Meals2",
     "node.js.detected.package.eslint": "true",
@@ -57,7 +60,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\Thumula\\Desktop\\SLLIT\\Y2 S2\\WMT\\Assignment\\Home_Meals2\\frontend\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "G:\\Users\\USER\\AppData\\Local\\JetBrains\\IntelliJ IDEA 2024.3.3\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -109,6 +112,7 @@
       <workItem from="1777709994508" duration="195000" />
       <workItem from="1777710201834" duration="592000" />
       <workItem from="1777710812301" duration="596000" />
+      <workItem from="1777712965263" duration="4695000" />
     </task>
     <task id="LOCAL-00001" summary="seller login">
       <option name="closed" value="true" />
@@ -214,7 +218,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777709138417</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="stash file">
+      <option name="closed" value="true" />
+      <created>1777713281959</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1777713281959</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -260,6 +272,7 @@
     <MESSAGE value="stash" />
     <MESSAGE value="stash2" />
     <MESSAGE value="Updated the finance UI to display edit and delete buttons" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated the finance UI to display edit and delete buttons" />
+    <MESSAGE value="stash file" />
+    <option name="LAST_COMMIT_MESSAGE" value="stash file" />
   </component>
 </project>

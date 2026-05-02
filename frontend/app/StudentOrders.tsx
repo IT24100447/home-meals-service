@@ -296,6 +296,16 @@ const styles = StyleSheet.create({
         color: '#30C65A', 
         fontSize: 11, 
         fontWeight: 'bold' 
+    },
+    paymentMethodText: {
+        fontSize: 12,
+        color: '#7F8C8D',
+        marginTop: 2
+    },
+    footerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     }
 });
 

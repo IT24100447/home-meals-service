@@ -78,7 +78,7 @@ const OrderScreen = () => {
             formData.append('totalPayment', (meal.price * Number(quantity)).toString());
             formData.append('contactNumber', contactNumber);
             formData.append('paymentMethod', paymentMethod);
-            formData.append('specialInstructions', specialInstructions);
+            formData.append('specialInstructions', specialInstructions || "");
 
             if (paymentMethod === 'card' && receiptImage) {
                 const fileName = receiptImage.split('/').pop() || `receipt_${Date.now()}.jpg`;
@@ -92,8 +92,10 @@ const OrderScreen = () => {
                 formData,
                 {
                     headers: {
+                        'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${token}`
-                    }
+                    },
+                    timeout: 15000 // 15 seconds
                 }
             );
 
