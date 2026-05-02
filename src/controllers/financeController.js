@@ -122,6 +122,36 @@ const financeController = {
         }
     },
 
+    updateExpense: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const updates = { ...req.body };
+            
+            if (req.file) {
+                updates.billImageUrl = req.file.path;
+            }
+
+            const expense = await Expense.findByIdAndUpdate(id, updates, { new: true });
+            if (!expense) return res.status(404).json({ message: "Expense not found" });
+
+            res.status(200).json({ message: "Expense updated successfully", expense });
+        } catch (err) {
+            res.status(500).json({ message: "Error updating expense", error: err.message });
+        }
+    },
+
+    deleteExpense: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const expense = await Expense.findByIdAndDelete(id);
+            if (!expense) return res.status(404).json({ message: "Expense not found" });
+
+            res.status(200).json({ message: "Expense deleted successfully" });
+        } catch (err) {
+            res.status(500).json({ message: "Error deleting expense", error: err.message });
+        }
+    },
+
     // 6. Monthly Financial Report Data (Now includes expenses)
     getFinancialReport: async (req, res) => {
         try {
