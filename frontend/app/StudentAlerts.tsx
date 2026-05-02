@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, RefreshControl, Platform } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, RefreshControl, Platform, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
@@ -33,7 +33,7 @@ const StudentAlerts = () => {
 
     const markAsRead = async (id: string) => {
         try {
-            const token = Platform.OS === 'web' ? localStorage.getItem('token') : await SecureStore.getItemAsync('userToken');
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
             await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/alerts/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -43,8 +43,35 @@ const StudentAlerts = () => {
         }
     };
 
+    const deleteAlert = async (id: string) => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            await axios.delete(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/alerts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAlerts(alerts.filter(a => a._id !== id));
+        } catch (err) {
+            console.error("Error deleting alert:", err);
+        }
+    };
+
+    const markAllRead = async () => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/alerts/mark-all-read`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAlerts(alerts.map(a => ({ ...a, isRead: true })));
+        } catch (err) {
+            console.error("Error marking all read:", err);
+        }
+    };
+
     const renderAlertItem = ({ item }: { item: any }) => (
-        <View style={[styles.alertCard, !item.isRead && styles.unreadCard]}>
+        <TouchableOpacity 
+            style={[styles.alertCard, !item.isRead && styles.unreadCard]}
+            onPress={() => markAsRead(item._id)}
+        >
             <View style={[styles.iconWrapper, { backgroundColor: item.title.includes('CANCELLED') ? '#FEEBEB' : '#E8F9EE' }]}>
                 <Ionicons 
                     name={item.title.includes('CANCELLED') ? "close-circle" : "notifications"} 
@@ -59,14 +86,26 @@ const StudentAlerts = () => {
                 </View>
                 <Text style={styles.alertMessage} numberOfLines={2}>{item.message}</Text>
             </View>
-            {!item.isRead && <View style={styles.unreadDot} />}
-        </View>
+            <View style={styles.rightActions}>
+                {!item.isRead && <View style={styles.unreadDot} />}
+                <TouchableOpacity onPress={() => deleteAlert(item._id)} style={styles.deleteButton}>
+                    <Ionicons name="trash-outline" size={20} color="#E74C3C" />
+                </TouchableOpacity>
+            </View>
+        </TouchableOpacity>
     );
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Notifications</Text>
+                <View style={styles.headerTop}>
+                    <Text style={styles.title}>Notifications</Text>
+                    {alerts.length > 0 && (
+                        <TouchableOpacity onPress={markAllRead}>
+                            <Text style={styles.markAllReadText}>Mark all as read</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
             {loading ? (
@@ -122,7 +161,11 @@ const styles = StyleSheet.create({
     unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#30C65A', marginLeft: 10 },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
     emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#1A1C1E', marginTop: 20 },
-    emptySubtitle: { fontSize: 14, color: '#A0A0A0', marginTop: 10, textAlign: 'center' }
+    emptySubtitle: { fontSize: 14, color: '#A0A0A0', marginTop: 10, textAlign: 'center' },
+    headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    markAllReadText: { color: '#30C65A', fontWeight: '600', fontSize: 14 },
+    rightActions: { alignItems: 'center', justifyContent: 'center', gap: 10 },
+    deleteButton: { padding: 5 }
 });
 
 export default StudentAlerts;

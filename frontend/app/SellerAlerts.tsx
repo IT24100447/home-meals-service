@@ -35,7 +35,7 @@ const SellerAlerts = () => {
 
     const markAsRead = async (id: string, relatedId?: string) => {
         try {
-            const token = Platform.OS === 'web' ? localStorage.getItem('token') : await SecureStore.getItemAsync('userToken');
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
             await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/alerts/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -46,6 +46,30 @@ const SellerAlerts = () => {
             }
         } catch (err) {
             console.error("Error marking alert as read:", err);
+        }
+    };
+
+    const deleteAlert = async (id: string) => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            await axios.delete(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/alerts/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAlerts(alerts.filter(a => a._id !== id));
+        } catch (err) {
+            console.error("Error deleting alert:", err);
+        }
+    };
+
+    const markAllRead = async () => {
+        try {
+            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
+            await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/alerts/mark-all-read`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAlerts(alerts.map(a => ({ ...a, isRead: true })));
+        } catch (err) {
+            console.error("Error marking all read:", err);
         }
     };
 
@@ -68,14 +92,26 @@ const SellerAlerts = () => {
                 </View>
                 <Text style={styles.alertMessage} numberOfLines={2}>{item.message}</Text>
             </View>
-            {!item.isRead && <View style={styles.unreadDot} />}
+            <View style={styles.rightActions}>
+                {!item.isRead && <View style={styles.unreadDot} />}
+                <TouchableOpacity onPress={() => deleteAlert(item._id)} style={styles.deleteButton}>
+                    <Ionicons name="trash-outline" size={20} color="#E74C3C" />
+                </TouchableOpacity>
+            </View>
         </TouchableOpacity>
     );
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Seller Notifications</Text>
+                <View style={styles.headerTop}>
+                    <Text style={styles.title}>Seller Notifications</Text>
+                    {alerts.length > 0 && (
+                        <TouchableOpacity onPress={markAllRead}>
+                            <Text style={styles.markAllReadText}>Mark all as read</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
             {loading ? (
@@ -131,7 +167,11 @@ const styles = StyleSheet.create({
     unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#30C65A', marginLeft: 10 },
     emptyContainer: { alignItems: 'center', marginTop: 100 },
     emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#1A1C1E', marginTop: 20 },
-    emptySubtitle: { fontSize: 14, color: '#A0A0A0', marginTop: 10, textAlign: 'center' }
+    emptySubtitle: { fontSize: 14, color: '#A0A0A0', marginTop: 10, textAlign: 'center' },
+    headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    markAllReadText: { color: '#30C65A', fontWeight: '600', fontSize: 14 },
+    rightActions: { alignItems: 'center', justifyContent: 'center', gap: 10 },
+    deleteButton: { padding: 5 }
 });
 
 export default SellerAlerts;
