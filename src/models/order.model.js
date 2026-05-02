@@ -61,6 +61,16 @@ const OrderSchema = new mongoose.Schema({
     specialInstructions: { type: String },
 
     cancelReason: { type: String },
+
+    platformFee: {
+        type: Number,
+        default: 0
+    },
+
+    sellerEarnings: {
+        type: Number,
+        default: 0
+    },
 }, {
     timestamps: true
 });
