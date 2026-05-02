@@ -17,4 +17,10 @@ router.patch('/verify/:paymentId', authMiddleware, financeController.verifyPayme
 // 4. Financial Report Data
 router.get('/report/:sellerId', authMiddleware, financeController.getFinancialReport);
 
+// 5. Seller adds an expense (materials, bills, etc.)
+router.post('/expenses', authMiddleware, upload.single('bill'), financeController.addExpense);
+
+// 6. Seller gets their expenses
+router.get('/expenses/:sellerId', authMiddleware, financeController.getExpenses);
+
 export default router;
