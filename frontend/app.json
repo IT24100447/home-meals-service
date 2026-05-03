@@ -4,7 +4,7 @@
     "slug": "home-bites",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/homebites-app-icon.png",
+    "icon": "./assets/images/homebites-logo-icon.png",
     "scheme": "homebites",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,11 +14,11 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/homebites-app-icon.png",
+        "foregroundImage": "./assets/images/homebites-logo-icon.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
+      "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
       "package": "com.homebites"
     },
@@ -31,7 +31,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/homebites-splash.png",
+          "image": "./assets/images/homebites-logo-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -42,7 +42,8 @@
       ],
       "expo-secure-store",
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      "./plugins/withAndroidGradleFix"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -51,8 +52,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "70a4cbf4-ffe7-4dc7-b8c5-98d49043de40"
+        "projectId": "85346ef2-759e-48d8-9f71-36d346ea7a8b"
       }
-    }
+    },
+    "owner": "bimsara003"
   }
 }
