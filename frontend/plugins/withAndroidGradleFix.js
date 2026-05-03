@@ -1,54 +1,64 @@
-/**
- * Expo Config Plugin: withAndroidGradleFix
- *
- * Purpose: The EAS Build server regenerates android/ from scratch via `expo prebuild`.
- * This plugin runs AFTER prebuild and patches the root android/build.gradle to:
- *   1. Remove any hardcoded AGP version pin from the classpath (let EAS/RN choose it).
- *   2. Remove any resolutionStrategy that forces a specific AGP version.
- *   3. Inject namespace for android library subprojects that are missing one.
- *
- * Without this, native modules (async-storage, gesture-handler, reanimated, etc.)
- * fail with "No matching variant... No variants exist" because the AGP version
- * attribute expected by the consumer doesn't match what the subprojects advertise.
- */
 const { withDangerousMod } = require('@expo/config-plugins');
 const fs = require('fs');
 const path = require('path');
+
+/**
+ * Community native modules that need to be explicitly included in settings.gradle.
+ * Format: { gradleName: 'project-name', npmPath: 'relative/path/in/node_modules' }
+ */
+const COMMUNITY_MODULES = [
+  {
+    gradleName: 'react-native-async-storage_async-storage',
+    npmPath: '@react-native-async-storage/async-storage/android',
+  },
+  {
+    gradleName: 'react-native-gesture-handler',
+    npmPath: 'react-native-gesture-handler/android',
+  },
+  {
+    gradleName: 'react-native-reanimated',
+    npmPath: 'react-native-reanimated/android',
+  },
+  {
+    gradleName: 'react-native-safe-area-context',
+    npmPath: 'react-native-safe-area-context/android',
+  },
+  {
+    gradleName: 'react-native-screens',
+    npmPath: 'react-native-screens/android',
+  },
+  {
+    gradleName: 'react-native-worklets',
+    npmPath: 'react-native-worklets/android',
+  },
+];
 
 const withAndroidGradleFix = (config) => {
   return withDangerousMod(config, [
     'android',
     async (config) => {
-      const gradlePath = path.join(
-        config.modRequest.platformProjectRoot,
-        'build.gradle'
-      );
+      const platformRoot = config.modRequest.platformProjectRoot;
 
-      if (!fs.existsSync(gradlePath)) {
-        console.warn('[withAndroidGradleFix] build.gradle not found at:', gradlePath);
-        return config;
-      }
+      // ─── 1. Patch android/build.gradle ────────────────────────────────────
+      const buildGradlePath = path.join(platformRoot, 'build.gradle');
+      if (fs.existsSync(buildGradlePath)) {
+        let contents = fs.readFileSync(buildGradlePath, 'utf8');
 
-      let contents = fs.readFileSync(gradlePath, 'utf8');
+        // Remove any hardcoded AGP version pin in classpath
+        contents = contents.replace(
+          /classpath\(['"]com\.android\.tools\.build:gradle:[^'"]+['"]\)/g,
+          "classpath('com.android.tools.build:gradle')"
+        );
 
-      // 1. Remove hardcoded AGP version pin e.g. 'com.android.tools.build:gradle:8.7.2'
-      //    Replace with versionless reference so Gradle BOM / RN plugin resolves it.
-      contents = contents.replace(
-        /classpath\(['"]com\.android\.tools\.build:gradle:[^'"]+['"]\)/g,
-        "classpath('com.android.tools.build:gradle')"
-      );
+        // Remove any resolutionStrategy that forces a specific AGP version
+        contents = contents.replace(
+          /configurations\.all\s*\{[\s\S]*?resolutionStrategy\s*\{[\s\S]*?force\s*['"]com\.android\.tools\.build:gradle:[^'"]+['"][\s\S]*?\}[\s\S]*?\}/gm,
+          ''
+        );
 
-      // 2. Remove the entire resolutionStrategy block that forces a specific AGP version.
-      //    This block causes all native library subprojects to produce zero variants.
-      contents = contents.replace(
-        /configurations\.all\s*\{[\s\S]*?resolutionStrategy\s*\{[\s\S]*?force\s*['"]com\.android\.tools\.build:gradle:[^'"]+['"][\s\S]*?\}[\s\S]*?\}/gm,
-        ''
-      );
-
-      // 3. Ensure the namespace injection subprojects block is present for libraries.
-      //    Only add if not already there (prebuild may or may not add this).
-      if (!contents.includes('subproject.plugins.withId("com.android.library")')) {
-        const namespaceBlock = `
+        // Ensure namespace injection block is present
+        if (!contents.includes('subproject.plugins.withId("com.android.library")')) {
+          contents += `
 subprojects { subproject ->
   subproject.plugins.withId("com.android.library") {
     subproject.android {
@@ -62,11 +72,41 @@ subprojects { subproject ->
   }
 }
 `;
-        contents += namespaceBlock;
+        }
+
+        fs.writeFileSync(buildGradlePath, contents, 'utf8');
+        console.log('[withAndroidGradleFix] ✓ Patched android/build.gradle');
       }
 
-      fs.writeFileSync(gradlePath, contents, 'utf8');
-      console.log('[withAndroidGradleFix] Successfully patched android/build.gradle');
+      // ─── 2. Patch android/settings.gradle ────────────────────────────────
+      const settingsGradlePath = path.join(platformRoot, 'settings.gradle');
+      if (fs.existsSync(settingsGradlePath)) {
+        let settings = fs.readFileSync(settingsGradlePath, 'utf8');
+
+        // Build explicit include block for community modules
+        // These are appended AFTER the existing autolinking calls.
+        // If autolinking already included them, the extra include is a no-op.
+        // If autolinking silently failed, this ensures they are found.
+        let explicitIncludes = '\n// --- Explicit community module includes (withAndroidGradleFix) ---\n';
+        for (const mod of COMMUNITY_MODULES) {
+          // Use a Gradle-evaluated path relative to rootDir so it resolves
+          // correctly on the EAS Linux server, not from this Windows machine.
+          explicitIncludes += `
+if (!settings.findProject(':${mod.gradleName}')) {
+  include ':${mod.gradleName}'
+  project(':${mod.gradleName}').projectDir = new File(rootDir, '../node_modules/${mod.npmPath}')
+}
+`;
+        }
+
+        // Only add the block if it isn't already there
+        if (!settings.includes('Explicit community module includes (withAndroidGradleFix)')) {
+          settings += explicitIncludes;
+          fs.writeFileSync(settingsGradlePath, settings, 'utf8');
+          console.log('[withAndroidGradleFix] ✓ Patched android/settings.gradle');
+        }
+      }
+
       return config;
     },
   ]);
