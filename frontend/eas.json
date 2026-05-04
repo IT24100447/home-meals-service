@@ -6,10 +6,7 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "env": {
-        "EXPO_USE_COMMUNITY_AUTOLINKING": "1"
-      }
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal",
@@ -17,15 +14,11 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://home-meals-service-production.up.railway.app",
-        "EXPO_USE_COMMUNITY_AUTOLINKING": "1"
+        "EXPO_PUBLIC_API_URL": "https://home-meals-service-production.up.railway.app"
       }
     },
     "production": {
-      "autoIncrement": true,
-      "env": {
-        "EXPO_USE_COMMUNITY_AUTOLINKING": "1"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {
