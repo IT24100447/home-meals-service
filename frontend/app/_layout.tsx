@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { useFonts, Nunito_700Bold, Nunito_800ExtraBold } from "@expo-google-fonts/nunito";
 import * as SplashScreen from 'expo-splash-screen';
@@ -26,7 +26,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#FFFFFF' } }} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#FFFFFF' } }} />
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }

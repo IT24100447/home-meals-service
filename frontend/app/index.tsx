@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default function Index() {
   return (
-    <ImageBackground source={require('../assets/images/background-doodles.png')} style={styles.container} imageStyle={styles.imagePattern} resizeMode="cover">
+    <ImageBackground source={require('../assets/images/background-doodles.jpg')} style={styles.container} imageStyle={styles.imagePattern} resizeMode="cover">
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>

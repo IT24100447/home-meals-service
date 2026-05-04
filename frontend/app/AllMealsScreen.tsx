@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import StudentMealCard from '../components/StudentMealCard';
@@ -72,7 +72,6 @@ const AllMealsScreen = () => {
             }
         };
 
-        loadUser();
         loadUser();
         fetchAllMeals();
         fetchWishlist();
