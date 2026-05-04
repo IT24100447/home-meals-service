@@ -66,6 +66,29 @@ const userLogin = async (req, res) => {
     };
 }
 
+//Reset Password
+const resetPassword = async (req, res) => {
+    try {
+        const { email, phoneNumber, newPassword } = req.body;
+        
+        if (!email || !phoneNumber || !newPassword) {
+            return res.status(400).json({ success: false, message: "Email, phone number, and new password are required." });
+        }
+
+        await userService.resetPassword(email, phoneNumber, newPassword);
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset successful"
+        });
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            message: err.message
+        });
+    }
+}
+
 const getSellers = async (req, res) => {
     try {
         const { city } = req.query;
@@ -147,4 +170,4 @@ const getWishlist = async (req, res) => {
     }
 };
 
-export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile, getProfile, updateProfile, toggleWishlist, getWishlist };
+export default { registerUser, findUserByEmail, userLogin, getSellers, getSellerProfile, getProfile, updateProfile, toggleWishlist, getWishlist, resetPassword };

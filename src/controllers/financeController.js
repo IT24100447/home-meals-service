@@ -169,7 +169,6 @@ const financeController = {
             const orders = await Order.find({
                 sellerId,
                 orderStatus: { $ne: 'cancelled' },
-                platformFee: { $gt: 0 },
                 createdAt: { $gte: startDate, $lte: endDate }
             }).populate('userId', 'firstName lastName email');
 
@@ -180,8 +179,8 @@ const financeController = {
             });
 
             const totalRevenue = orders.reduce((sum, order) => sum + order.totalPayment, 0);
-            const totalCommission = orders.reduce((sum, order) => sum + order.platformFee, 0);
-            const grossProfit = orders.reduce((sum, order) => sum + order.sellerEarnings, 0);
+            const totalCommission = 0; // App charge is removed entirely
+            const grossProfit = totalRevenue; // Gross profit is now 100% of revenue
             const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
             const netProfit = grossProfit - totalExpenses;
 

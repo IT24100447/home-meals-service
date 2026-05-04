@@ -11,6 +11,9 @@ function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -56,6 +59,34 @@ function LoginScreen() {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!email || !phoneNumber || !newPassword) {
+      Alert.alert("Error", "Please fill in all the fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/users/reset-password`, {
+        email,
+        phoneNumber,
+        newPassword
+      });
+      if (response.status === 200) {
+        Alert.alert("Success", "Password reset successfully. You can now login.");
+        setIsForgotPassword(false);
+        setPassword('');
+        setNewPassword('');
+        setPhoneNumber('');
+      }
+    } catch (err: any) {
+      console.log("Error Reset Password: ", err);
+      const errorMessage = err.response?.data?.message || "Invalid email or phone number";
+      Alert.alert("Reset Failed", errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -66,10 +97,71 @@ function LoginScreen() {
         </TouchableOpacity>
 
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
+          <Text style={styles.title}>{isForgotPassword ? "Reset Password" : "Welcome Back"}</Text>
+          <Text style={styles.subtitle}>{isForgotPassword ? "Enter details to reset" : "Sign in to continue"}</Text>
         </View>
 
+        {isForgotPassword ? (
+          <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email Address</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="mail-outline" size={20} color="#A0A0A0" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder='example@gmail.com'
+                  placeholderTextColor="#A0A0A0"
+                  value={email}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  onChangeText={setEmail} />
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Phone Number</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="call-outline" size={20} color="#A0A0A0" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder='07X XXX XXXX'
+                  placeholderTextColor="#A0A0A0"
+                  value={phoneNumber}
+                  keyboardType="phone-pad"
+                  onChangeText={setPhoneNumber} />
+              </View>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>New Password</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="lock-closed-outline" size={20} color="#A0A0A0" style={styles.inputIcon} />
+                <TextInput
+                  placeholder='••••••••'
+                  placeholderTextColor="#A0A0A0"
+                  secureTextEntry={!showPassword}
+                  style={styles.input}
+                  value={newPassword}
+                  onChangeText={setNewPassword} />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                  <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#A0A0A0" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.loginButton} onPress={handleResetPassword} disabled={loading}>
+              {loading ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <Text style={styles.loginButtonText}>Reset Password</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => setIsForgotPassword(false)} style={{ marginTop: 20, alignItems: 'center' }}>
+              <Text style={styles.registerLink}>Back to Login</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email Address</Text>
@@ -105,6 +197,9 @@ function LoginScreen() {
                 />
               </TouchableOpacity>
             </View>
+            <TouchableOpacity onPress={() => setIsForgotPassword(true)} style={{ alignSelf: 'flex-end', marginTop: 8 }}>
+              <Text style={{ color: '#30C65A', fontWeight: '600' }}>Forgot Password?</Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
@@ -124,6 +219,7 @@ function LoginScreen() {
             </Link>
           </View>
         </View>
+        )}
       </View>
     </SafeAreaView>
   );

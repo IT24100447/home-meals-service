@@ -14,12 +14,10 @@ const SellerFinanceScreen = () => {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [reportData, setReportData] = useState<any>(null);
-    const [pendingPayments, setPendingPayments] = useState<any[]>([]);
     const [selectedPayment, setSelectedPayment] = useState<any>(null);
     const [showSlipModal, setShowSlipModal] = useState(false);
     const [showExpenseModal, setShowExpenseModal] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
-    const [verifying, setVerifying] = useState(false);
     const [generatingReport, setGeneratingReport] = useState(false);
     const [savingExpense, setSavingExpense] = useState(false);
 
@@ -47,11 +45,6 @@ const SellerFinanceScreen = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setReportData(reportRes.data);
-
-            const paymentsRes = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/seller/payments/${sellerId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setPendingPayments(paymentsRes.data.filter((p: any) => p.status === 'pending' && p.paymentMethod === 'bank_transfer'));
         } catch (err) {
             console.error("Error fetching finance data:", err);
         } finally {
@@ -199,14 +192,6 @@ const SellerFinanceScreen = () => {
                             <div class="stat-value">LKR ${reportData.stats?.totalRevenue?.toLocaleString()}</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-label">Platform Fee</div>
-                            <div class="stat-value" style="color: #E74C3C;">LKR ${reportData.stats?.totalCommission?.toLocaleString()}</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Gross Profit</div>
-                            <div class="stat-value">LKR ${reportData.stats?.grossProfit?.toLocaleString()}</div>
-                        </div>
-                        <div class="stat-card">
                             <div class="stat-label">Expenses</div>
                             <div class="stat-value" style="color: #E67E22;">LKR ${reportData.stats?.totalExpenses?.toLocaleString()}</div>
                         </div>
@@ -296,23 +281,6 @@ const SellerFinanceScreen = () => {
         fetchFinanceData();
     }, []);
 
-    const handleVerify = async (paymentId: string, status: 'verified' | 'rejected') => {
-        setVerifying(true);
-        try {
-            const token = Platform.OS === 'web' ? localStorage.getItem('userToken') : await SecureStore.getItemAsync('userToken');
-            await axios.patch(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/finance/verify/${paymentId}`, { status }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            Alert.alert("Success", `Payment ${status === 'verified' ? 'verified' : 'rejected'} successfully`);
-            setShowSlipModal(false);
-            fetchFinanceData();
-        } catch (err) {
-            Alert.alert("Error", "Failed to verify payment");
-        } finally {
-            setVerifying(false);
-        }
-    };
-
     if (loading) {
         return (
             <SafeAreaView style={styles.container}>
@@ -383,46 +351,6 @@ const SellerFinanceScreen = () => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Verification Section */}
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Slip Verifications</Text>
-                    {pendingPayments.length > 0 && (
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>{pendingPayments.length} New</Text>
-                        </View>
-                    )}
-                </View>
-
-                {pendingPayments.length === 0 ? (
-                    <View style={styles.emptyState}>
-                        <View style={styles.emptyIconCircle}>
-                            <Ionicons name="checkmark-done" size={40} color="#30C65A" />
-                        </View>
-                        <Text style={styles.emptyText}>All payments are up to date!</Text>
-                    </View>
-                ) : (
-                    pendingPayments.map((payment) => (
-                        <TouchableOpacity 
-                            key={payment._id} 
-                            style={styles.paymentCard}
-                            onPress={() => { setSelectedPayment(payment); setShowSlipModal(true); }}
-                        >
-                            <View style={styles.paymentMain}>
-                                <View style={styles.paymentText}>
-                                    <Text style={styles.studentName}>{payment.studentId?.firstName} {payment.studentId?.lastName}</Text>
-                                    <Text style={styles.orderRef}>Order #{payment.orderId?._id?.substring(0, 8).toUpperCase()}</Text>
-                                </View>
-                                <View style={styles.amountInfo}>
-                                    <Text style={styles.amountText}>LKR {payment.amount?.toLocaleString()}</Text>
-                                    <View style={styles.viewLink}>
-                                        <Text style={styles.viewLinkText}>View Slip</Text>
-                                        <Ionicons name="chevron-forward" size={14} color="#30C65A" />
-                                    </View>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    ))
-                )}
 
                 {/* Monthly Expenditure Section */}
                 <View style={[styles.sectionHeader, { marginTop: 25 }]}>
@@ -520,10 +448,6 @@ const SellerFinanceScreen = () => {
                             <View style={styles.previewStatRow}>
                                 <Text style={styles.previewStatLabel}>Total Revenue</Text>
                                 <Text style={styles.previewStatValue}>LKR {reportData?.stats?.totalRevenue?.toLocaleString()}</Text>
-                            </View>
-                            <View style={styles.previewStatRow}>
-                                <Text style={styles.previewStatLabel}>Platform Fee (10%)</Text>
-                                <Text style={[styles.previewStatValue, { color: '#E74C3C' }]}>- LKR {reportData?.stats?.totalCommission?.toLocaleString()}</Text>
                             </View>
                             <View style={styles.previewStatRow}>
                                 <Text style={styles.previewStatLabel}>Total Expenses</Text>
@@ -639,12 +563,8 @@ const SellerFinanceScreen = () => {
                     <View style={styles.modalContent}>
                         <View style={styles.modalHeader}>
                             <View>
-                                <Text style={styles.modalTitle}>
-                                    {selectedPayment?.isExpense ? 'Expense Reference' : 'Bank Slip Verification'}
-                                </Text>
-                                <Text style={styles.modalSubtitle}>
-                                    {selectedPayment?.isExpense ? 'Reference image for your expenditure' : 'Check details carefully before confirming'}
-                                </Text>
+                                <Text style={styles.modalTitle}>Expense Reference</Text>
+                                <Text style={styles.modalSubtitle}>Reference image for your expenditure</Text>
                             </View>
                             <TouchableOpacity onPress={() => setShowSlipModal(false)} style={styles.closeBtn}>
                                 <Ionicons name="close" size={24} color="#1A1C1E" />
@@ -653,42 +573,19 @@ const SellerFinanceScreen = () => {
                         
                         <View style={styles.imageContainer}>
                             <Image 
-                                source={{ uri: selectedPayment?.isExpense ? selectedPayment?.billImageUrl : selectedPayment?.bankSlipUrl }} 
+                                source={{ uri: selectedPayment?.billImageUrl }} 
                                 style={styles.fullSlipImage} 
                                 resizeMode="contain"
                             />
                         </View>
 
                         <View style={styles.modalFooter}>
-                            {selectedPayment?.isExpense ? (
-                                <TouchableOpacity 
-                                    style={[styles.actionBtn, styles.btnVerify, { backgroundColor: '#1A1C1E' }]} 
-                                    onPress={() => setShowSlipModal(false)}
-                                >
-                                    <Text style={[styles.btnText, { color: '#FFF' }]}>Close Preview</Text>
-                                </TouchableOpacity>
-                            ) : (
-                                <>
-                                    <TouchableOpacity 
-                                        style={[styles.actionBtn, styles.btnReject]} 
-                                        onPress={() => handleVerify(selectedPayment?._id, 'rejected')}
-                                        disabled={verifying}
-                                    >
-                                        <Text style={[styles.btnText, { color: '#E74C3C' }]}>Reject</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity 
-                                        style={[styles.actionBtn, styles.btnVerify]} 
-                                        onPress={() => handleVerify(selectedPayment?._id, 'verified')}
-                                        disabled={verifying}
-                                    >
-                                        {verifying ? (
-                                            <ActivityIndicator color="#FFF" />
-                                        ) : (
-                                            <Text style={[styles.btnText, { color: '#FFF' }]}>Confirm Payment</Text>
-                                        )}
-                                    </TouchableOpacity>
-                                </>
-                            )}
+                            <TouchableOpacity 
+                                style={[styles.actionBtn, styles.btnVerify, { backgroundColor: '#1A1C1E' }]} 
+                                onPress={() => setShowSlipModal(false)}
+                            >
+                                <Text style={[styles.btnText, { color: '#FFF' }]}>Close Preview</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </View>

@@ -65,9 +65,8 @@ const updateOrderStatus = async (orderId, status, cancelReason = null) => {
 
     // Financial Calculation Logic
     if (status === 'preparing') {
-        const commissionRate = 0.10; // 10% Platform Fee
-        order.platformFee = order.totalPayment * commissionRate;
-        order.sellerEarnings = order.totalPayment - order.platformFee;
+        order.platformFee = 0;
+        order.sellerEarnings = order.totalPayment;
     } else if (status === 'cancelled') {
         // Reset financial data if order is cancelled
         order.platformFee = 0;

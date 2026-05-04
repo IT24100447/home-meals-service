@@ -87,6 +87,21 @@ const loginUser = async (userInput) => {
 
 }
 
+// Reset User Password
+const resetPassword = async (email, phoneNumber, newPassword) => {
+    const user = await User.findOne({ email: email, phoneNumber: phoneNumber });
+
+    if (!user) {
+        throw new Error("Invalid email or phone number.");
+    }
+
+    const hashedPwd = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPwd;
+    await user.save();
+
+    return true;
+}
+
 const getAllSellers = async (city) => {
     const query = { role: 'seller' };
     if (city) {
@@ -145,4 +160,4 @@ const getWishlist = async (userId) => {
     return user.wishlist;
 };
 
-export default { createUser, findUserByEmail, loginUser, getAllSellers, getSellerById, updateUserProfile, toggleWishlist, getWishlist };
+export default { createUser, findUserByEmail, loginUser, getAllSellers, getSellerById, updateUserProfile, toggleWishlist, getWishlist, resetPassword };
