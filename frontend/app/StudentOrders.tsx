@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, Image, ActivityIndicator, RefreshControl, Platform } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, Image, ActivityIndicator, RefreshControl, Platform, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
@@ -14,6 +14,10 @@ const StudentOrders = () => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+    const [cancelReason, setCancelReason] = useState('');
+    const [cancelling, setCancelling] = useState(false);
 
     const fetchOrders = async () => {
         try {
@@ -94,6 +98,36 @@ const StudentOrders = () => {
     const onRefresh = () => {
         setRefreshing(true);
         fetchOrders();
+    };
+
+    const handleCancelOrder = async () => {
+        if (!selectedOrderId) return;
+        setCancelling(true);
+        try {
+            const token = Platform.OS === 'web'
+                ? localStorage.getItem('userToken')
+                : await SecureStore.getItemAsync('userToken');
+
+            await axios.put(
+                `${process.env.EXPO_PUBLIC_API_URL}/api/v1/orders/${selectedOrderId}/cancel`,
+                { cancelReason: cancelReason.trim() || 'Cancelled by customer' },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setShowCancelModal(false);
+            setSelectedOrderId(null);
+            setCancelReason('');
+            fetchOrders();
+        } catch (err: any) {
+            const msg = err.response?.data?.message || 'Failed to cancel order. Please try again.';
+            if (Platform.OS === 'web') {
+                alert(msg);
+            } else {
+                const { Alert } = require('react-native');
+                Alert.alert('Error', msg);
+            }
+        } finally {
+            setCancelling(false);
+        }
     };
 
     const getStatusColor = (status: string) => {
@@ -188,6 +222,20 @@ const StudentOrders = () => {
                     <Text style={styles.cancelReason}>Reason: {item.cancelReason}</Text>
                 )}
             </View>
+
+            {/* Cancel Order button — only when pending */}
+            {item.orderStatus === 'pending' && (
+                <TouchableOpacity
+                    style={styles.cancelOrderBtn}
+                    onPress={() => {
+                        setSelectedOrderId(item._id);
+                        setShowCancelModal(true);
+                    }}
+                >
+                    <Ionicons name="close-circle-outline" size={16} color="#E74C3C" />
+                    <Text style={styles.cancelOrderBtnText}>Cancel Order</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 
@@ -220,6 +268,52 @@ const StudentOrders = () => {
                     }
                 />
             )}
+            
+            {/* Cancel Order Modal */}
+            <Modal
+                visible={showCancelModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowCancelModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.cancelModal}>
+                        <View style={styles.cancelModalHandle} />
+                        <Text style={styles.cancelModalTitle}>Cancel Order</Text>
+                        <Text style={styles.cancelModalSubtitle}>
+                            Please tell us why you're cancelling (optional):
+                        </Text>
+                        <TextInput
+                            style={styles.cancelReasonInput}
+                            placeholder="e.g. Changed my mind, ordered by mistake..."
+                            placeholderTextColor="#B0B0B0"
+                            value={cancelReason}
+                            onChangeText={setCancelReason}
+                            multiline
+                            numberOfLines={3}
+                        />
+                        <View style={styles.cancelModalBtns}>
+                            <TouchableOpacity
+                                style={styles.cancelModalDismiss}
+                                onPress={() => { setShowCancelModal(false); setCancelReason(''); }}
+                            >
+                                <Text style={styles.cancelModalDismissText}>Go Back</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.cancelModalConfirm}
+                                onPress={handleCancelOrder}
+                                disabled={cancelling}
+                            >
+                                {cancelling
+                                    ? <ActivityIndicator color="#FFF" size="small" />
+                                    : <Text style={styles.cancelModalConfirmText}>Confirm Cancel</Text>
+                                }
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
             <BottomNavBar role="student" />
         </SafeAreaView>
     );
@@ -306,7 +400,96 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-    }
+    },
+    cancelOrderBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-end',
+        marginTop: 10,
+        backgroundColor: '#FFF0EF',
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#E74C3C',
+        gap: 6,
+    },
+    cancelOrderBtnText: {
+        color: '#E74C3C',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'flex-end',
+    },
+    cancelModal: {
+        backgroundColor: '#FFF',
+        borderTopLeftRadius: 28,
+        borderTopRightRadius: 28,
+        padding: 25,
+        paddingTop: 15,
+    },
+    cancelModalHandle: {
+        width: 40,
+        height: 4,
+        backgroundColor: '#E0E0E0',
+        borderRadius: 2,
+        alignSelf: 'center',
+        marginBottom: 18,
+    },
+    cancelModalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#1A1C1E',
+        marginBottom: 6,
+    },
+    cancelModalSubtitle: {
+        fontSize: 14,
+        color: '#7F8C8D',
+        marginBottom: 16,
+    },
+    cancelReasonInput: {
+        backgroundColor: '#F9F9F9',
+        borderWidth: 1,
+        borderColor: '#EEE',
+        borderRadius: 14,
+        padding: 14,
+        fontSize: 14,
+        textAlignVertical: 'top',
+        marginBottom: 20,
+        color: '#1A1C1E',
+    },
+    cancelModalBtns: {
+        flexDirection: 'row',
+        gap: 12,
+        paddingBottom: 10,
+    },
+    cancelModalDismiss: {
+        flex: 1,
+        padding: 15,
+        backgroundColor: '#F5F5F5',
+        borderRadius: 14,
+        alignItems: 'center',
+    },
+    cancelModalDismissText: {
+        fontWeight: 'bold',
+        color: '#7F8C8D',
+        fontSize: 14,
+    },
+    cancelModalConfirm: {
+        flex: 1,
+        padding: 15,
+        backgroundColor: '#E74C3C',
+        borderRadius: 14,
+        alignItems: 'center',
+    },
+    cancelModalConfirmText: {
+        fontWeight: 'bold',
+        color: '#FFF',
+        fontSize: 14,
+    },
 });
 
 export default StudentOrders;

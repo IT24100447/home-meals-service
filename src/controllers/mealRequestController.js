@@ -76,10 +76,27 @@ const fulfillRequest = async (req, res) => {
   }
 };
 
+const deleteRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const request = await mealRequestService.deleteMealRequest(id, userId);
+    res.status(200).json({
+      success: true,
+      request,
+      message: "Meal request deleted successfully",
+    });
+  } catch (err) {
+    console.error("Delete Request Error:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 export default {
   createRequest,
   getAvailableRequests,
   getMyRequests,
   acceptRequest,
   fulfillRequest,
+  deleteRequest,
 };

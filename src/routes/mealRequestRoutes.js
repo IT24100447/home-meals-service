@@ -14,4 +14,7 @@ router.get("/available", authMiddleware, mealRequestController.getAvailableReque
 router.put("/accept/:id", authMiddleware, mealRequestController.acceptRequest);
 router.put("/fulfill/:id", authMiddleware, mealRequestController.fulfillRequest);
 
+// Delete route (student only, pending status)
+router.delete("/:id", authMiddleware, mealRequestController.deleteRequest);
+
 export default router;

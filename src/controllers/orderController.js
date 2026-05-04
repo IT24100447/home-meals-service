@@ -37,4 +37,17 @@ const updateStatus = async (req, res) => {
     }
 };
 
-export default { placeOrder, getMyOrders, updateStatus };
+const cancelOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { cancelReason } = req.body;
+        const userId = req.user.id;
+        const order = await orderService.cancelOrderByStudent(id, userId, cancelReason);
+        res.status(200).json({ success: true, order, message: "Order cancelled successfully" });
+    } catch (err) {
+        console.error("Cancel Order Error:", err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+export default { placeOrder, getMyOrders, updateStatus, cancelOrder };

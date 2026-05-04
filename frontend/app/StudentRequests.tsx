@@ -144,6 +144,35 @@ const StudentRequests = () => {
         }
     };
 
+    const handleDeleteRequest = async (requestId: string) => {
+        Alert.alert(
+            "Delete Request",
+            "Are you sure you want to delete this meal request? This cannot be undone.",
+            [
+                { text: "Keep It", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            const token = Platform.OS === 'web'
+                                ? localStorage.getItem('userToken')
+                                : await SecureStore.getItemAsync('userToken');
+                            await axios.delete(
+                                `${process.env.EXPO_PUBLIC_API_URL}/api/v1/meal-requests/${requestId}`,
+                                { headers: { Authorization: `Bearer ${token}` } }
+                            );
+                            Alert.alert("Deleted", "Your meal request has been removed.");
+                            fetchMyRequests();
+                        } catch (err: any) {
+                            Alert.alert("Error", err.response?.data?.message || "Failed to delete request.");
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     const renderRequestCard = ({ item }: { item: any }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -197,6 +226,17 @@ const StudentRequests = () => {
 
             {item.prescriptionImage && (
                 <Image source={{ uri: item.prescriptionImage }} style={styles.requestImage} />
+            )}
+
+            {/* Delete button — only for pending requests */}
+            {item.status === 'pending' && (
+                <TouchableOpacity
+                    style={styles.deleteBtn}
+                    onPress={() => handleDeleteRequest(item._id)}
+                >
+                    <Ionicons name="trash-outline" size={15} color="#E74C3C" />
+                    <Text style={styles.deleteBtnText}>Delete Request</Text>
+                </TouchableOpacity>
             )}
         </View>
     );
@@ -358,7 +398,25 @@ const styles = StyleSheet.create({
     emptyContainer: { alignItems: 'center', marginTop: 100 },
     emptyText: { marginTop: 20, fontSize: 16, color: '#A0A0A0' },
     emptyAddBtn: { marginTop: 20, backgroundColor: '#E8F9EE', padding: 15, borderRadius: 15 },
-    emptyAddBtnText: { color: '#30C65A', fontWeight: 'bold' }
+    emptyAddBtnText: { color: '#30C65A', fontWeight: 'bold' },
+    deleteBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 12,
+        alignSelf: 'flex-end',
+        backgroundColor: '#FFF0EF',
+        paddingHorizontal: 12,
+        paddingVertical: 7,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#E74C3C',
+        gap: 5,
+    },
+    deleteBtnText: {
+        color: '#E74C3C',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
 });
 
 export default StudentRequests;

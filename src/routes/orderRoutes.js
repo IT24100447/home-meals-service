@@ -8,5 +8,7 @@ const router = Router();
 router.post("/", authMiddleware, upload.single('receiptImage'), orderController.placeOrder);
 router.get("/my-orders", authMiddleware, orderController.getMyOrders);
 router.put("/:id/status", authMiddleware, orderController.updateStatus);
+router.put("/:id/cancel", authMiddleware, orderController.cancelOrder);
 
 export default router;
+

@@ -22,6 +22,7 @@ const MealDetailsScreen = () => {
     const [reviewImage, setReviewImage] = useState<string | null>(null);
     const [postingReview, setPostingReview] = useState(false);
     const [isWishlisted, setIsWishlisted] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchMealDetails = async () => {
@@ -58,6 +59,15 @@ const MealDetailsScreen = () => {
             fetchMealDetails();
             fetchWishlistStatus();
         }
+
+        // Load current user ID to show delete on own reviews
+        const loadUserId = async () => {
+            const uid = Platform.OS === 'web'
+                ? localStorage.getItem('userId')
+                : await SecureStore.getItemAsync('userId');
+            setCurrentUserId(uid);
+        };
+        loadUserId();
     }, [id]);
 
     const handleToggleWishlist = async () => {
@@ -117,10 +127,6 @@ const MealDetailsScreen = () => {
     const handlePostReview = async () => {
         if (reviewRating === 0) {
             Alert.alert("Required", "Please select a rating.");
-            return;
-        }
-        if (!reviewImage) {
-            Alert.alert("Required", "Please upload a photo of the meal to add a review.");
             return;
         }
 
@@ -185,6 +191,44 @@ const MealDetailsScreen = () => {
         } finally {
             setPostingReview(false);
         }
+    };
+
+    const handleDeleteReview = (reviewId: string) => {
+        Alert.alert(
+            "Delete Review",
+            "Are you sure you want to remove your review? This action cannot be undone.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            const token = Platform.OS === 'web'
+                                ? localStorage.getItem('userToken')
+                                : await SecureStore.getItemAsync('userToken');
+                            const userId = Platform.OS === 'web'
+                                ? localStorage.getItem('userId')
+                                : await SecureStore.getItemAsync('userId');
+
+                            await axios.delete(
+                                `${process.env.EXPO_PUBLIC_API_URL}/api/v1/reviews/${reviewId}`,
+                                {
+                                    headers: { Authorization: `Bearer ${token}` },
+                                    data: { userId }
+                                }
+                            );
+                            Alert.alert("Deleted", "Your review has been removed.");
+                            // Refresh reviews
+                            const reviewFetch = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/api/v1/meals/${id}`);
+                            if (reviewFetch.data.success) setReviews(reviewFetch.data.reviews);
+                        } catch (err: any) {
+                            Alert.alert("Error", err.response?.data?.message || "Failed to delete review.");
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     if (loading) {
@@ -294,9 +338,20 @@ const MealDetailsScreen = () => {
                                 <View style={styles.reviewContent}>
                                     <View style={styles.reviewMain}>
                                         <Text style={styles.reviewerName}>{review.userId?.firstName} {review.userId?.lastName}</Text>
-                                        <View style={styles.reviewRating}>
-                                            <Ionicons name="star" size={12} color="#FFD700" />
-                                            <Text style={styles.reviewRatingText}>{review.rating}</Text>
+                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                            <View style={styles.reviewRating}>
+                                                <Ionicons name="star" size={12} color="#FFD700" />
+                                                <Text style={styles.reviewRatingText}>{review.rating}</Text>
+                                            </View>
+                                            {/* Delete button — only visible to the review author */}
+                                            {review.userId?._id === currentUserId && (
+                                                <TouchableOpacity
+                                                    onPress={() => handleDeleteReview(review._id)}
+                                                    style={styles.reviewDeleteBtn}
+                                                >
+                                                    <Ionicons name="trash-outline" size={14} color="#E74C3C" />
+                                                </TouchableOpacity>
+                                            )}
                                         </View>
                                     </View>
                                     <Text style={styles.reviewComment}>{review.comment}</Text>
@@ -336,22 +391,22 @@ const MealDetailsScreen = () => {
                         />
                     </View>
 
-                    {/* Image Upload for Review */}
+                    {/* Image Upload for Review (Optional) */}
                     <TouchableOpacity style={styles.reviewImagePicker} onPress={pickReviewImage}>
                         {reviewImage ? (
                             <Image source={{ uri: reviewImage }} style={styles.reviewImagePreview} />
                         ) : (
                             <View style={styles.pickerPlaceholder}>
                                 <Ionicons name="camera" size={24} color="#30C65A" />
-                                <Text style={styles.pickerText}>Add Meal Photo</Text>
+                                <Text style={styles.pickerText}>Add Meal Photo (Optional)</Text>
                             </View>
                         )}
                     </TouchableOpacity>
 
                     <TouchableOpacity 
-                        style={[styles.postButton, (!reviewImage || reviewRating === 0) && styles.disabledPostButton]}
+                        style={[styles.postButton, reviewRating === 0 && styles.disabledPostButton]}
                         onPress={handlePostReview}
-                        disabled={postingReview || !reviewImage || reviewRating === 0}
+                        disabled={postingReview || reviewRating === 0}
                     >
                         {postingReview ? (
                             <ActivityIndicator color="#FFF" />
@@ -699,6 +754,12 @@ const styles = StyleSheet.create({
     },
     disabledPostButton: {
         backgroundColor: '#D1D1D1',
+    },
+    reviewDeleteBtn: {
+        marginLeft: 8,
+        padding: 4,
+        backgroundColor: '#FFF0EF',
+        borderRadius: 6,
     },
     starRow: {
         flexDirection: 'row',

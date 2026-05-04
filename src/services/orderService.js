@@ -101,4 +101,31 @@ const updateOrderStatus = async (orderId, status, cancelReason = null) => {
     return order;
 };
 
-export default { createOrder, getOrdersForUser, updateOrderStatus };
+const cancelOrderByStudent = async (orderId, userId, cancelReason) => {
+    const order = await Order.findById(orderId);
+    if (!order) throw new Error("Order not found");
+    if (order.userId.toString() !== userId.toString())
+        throw new Error("Not authorized to cancel this order");
+    if (order.orderStatus !== "pending")
+        throw new Error("Order can only be cancelled while it is still pending");
+
+    order.orderStatus = "cancelled";
+    order.cancelReason = cancelReason || "Cancelled by customer";
+    order.platformFee = 0;
+    order.sellerEarnings = 0;
+    await order.save();
+
+    // Notify the seller
+    await Alert.create({
+        userId: order.sellerId,
+        title: "Order Cancelled",
+        message: `A customer cancelled their order. Reason: ${order.cancelReason}`,
+        type: "order",
+        relatedId: order._id,
+        relatedModel: 'Order'
+    });
+
+    return order;
+};
+
+export default { createOrder, getOrdersForUser, updateOrderStatus, cancelOrderByStudent };

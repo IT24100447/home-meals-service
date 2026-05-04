@@ -37,8 +37,7 @@ const ReviewSchema = new mongoose.Schema({
     },
 
     reviewPhoto: {
-        type: String,
-        required: true
+        type: String
     },
 
     sellerReply: {

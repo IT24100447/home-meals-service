@@ -108,10 +108,29 @@ const fulfillMealRequest = async (requestId, sellerId) => {
   }
 };
 
+const deleteMealRequest = async (requestId, userId) => {
+  try {
+    const request = await MealRequest.findById(requestId);
+    if (!request) throw new Error("Meal request not found");
+    if (request.userId.toString() !== userId.toString())
+      throw new Error("Not authorized to delete this request");
+    if (request.status !== "pending")
+      throw new Error("Only pending requests can be deleted");
+
+    await MealRequest.findByIdAndDelete(requestId);
+    console.log("Meal Request deleted successfully");
+    return request;
+  } catch (err) {
+    console.error("Error deleting meal request:", err);
+    throw new Error(err.message || "Error deleting meal request");
+  }
+};
+
 export default {
   createMealRequest,
   getAvailableMealRequests,
   getStudentMealRequests,
   acceptMealRequest,
   fulfillMealRequest,
+  deleteMealRequest,
 };
