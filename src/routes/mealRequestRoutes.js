@@ -8,6 +8,8 @@ const router = Router();
 // Student routes
 router.post("/", authMiddleware, upload.single('prescriptionImage'), mealRequestController.createRequest);
 router.get("/my-requests", authMiddleware, mealRequestController.getMyRequests);
+router.put("/:id", authMiddleware, upload.single('prescriptionImage'), mealRequestController.updateRequest);
+router.delete("/:id", authMiddleware, mealRequestController.deleteRequest);
 
 // Seller routes
 router.get("/available", authMiddleware, mealRequestController.getAvailableRequests);

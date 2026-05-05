@@ -17,7 +17,7 @@ const ReviewSchema = new mongoose.Schema({
     mealId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Meal",
-        required: true
+        required: false // Changed to false to support reviews for meal requests
     },
 
     orderId: {
